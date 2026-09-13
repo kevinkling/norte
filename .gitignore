@@ -11,3 +11,5 @@ data/change_log.jsonl
 .DS_Store
 .vscode/
 coverage/
+**/__pycache__/
+*.pyc
