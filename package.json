@@ -1,0 +1,10 @@
+{
+  "name": "norte",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --dir frontend dev",
+    "build": "pnpm --dir frontend build",
+    "test": "pnpm --dir frontend test",
+    "dev:api": "go run ./backend/cmd/norte-api"
+  }
+}
