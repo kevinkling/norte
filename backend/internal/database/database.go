@@ -17,7 +17,7 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-const SchemaVersion = 2
+const SchemaVersion = 3
 
 func Open(path string) (*sql.DB, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

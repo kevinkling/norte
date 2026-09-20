@@ -8,9 +8,9 @@ export type Combo = {
 }
 
 function scoreItem(item: Item, period: string): number {
-  const pri = 5 - (item.priority ?? 3)
-  const monthBonus = item.targetMonth === period ? 2 : item.targetMonth && item.targetMonth < period ? 1 : 0
-  return pri * 10 + monthBonus
+  const monthBonus = item.targetMonth === period ? 20 : item.targetMonth && item.targetMonth < period ? 10 : 0
+  const order = Number.isFinite(item.position) ? Math.max(0, 100000 - item.position) : 0
+  return monthBonus + order / 100
 }
 
 export function suggestCombinations(items: Item[], budgetMinor: number, period: string, max = 3): Combo[] {

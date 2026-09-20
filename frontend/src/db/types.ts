@@ -10,6 +10,8 @@ export type EntityType =
   | 'inspiration'
   | 'monthly_budget'
   | 'attachment'
+  | 'tag'
+  | 'item_tag'
 
 export interface SyncMeta {
   id: string
@@ -24,6 +26,17 @@ export interface Category extends SyncMeta {
   name: string
   parentId: string | null
   position: number
+}
+
+export interface Tag extends SyncMeta {
+  area: CategoryArea
+  name: string
+  position: number
+}
+
+export interface ItemTag extends SyncMeta {
+  itemId: string
+  tagId: string
 }
 
 export interface Item extends SyncMeta {
@@ -64,6 +77,7 @@ export interface Task extends SyncMeta {
 
 export interface Inspiration extends SyncMeta {
   area: Area
+  itemId: string | null
   categoryId: string | null
   title: string
   notes: string
@@ -122,4 +136,24 @@ export interface ConflictRow {
   resolution: 'local' | 'remote' | null
 }
 
-export type DomainRecord = Category | Item | Purchase | Task | Inspiration | MonthlyBudget | Attachment
+export type DomainRecord =
+  | Category
+  | Tag
+  | ItemTag
+  | Item
+  | Purchase
+  | Task
+  | Inspiration
+  | MonthlyBudget
+  | Attachment
+
+export type DomainTableName =
+  | 'categories'
+  | 'tags'
+  | 'itemTags'
+  | 'items'
+  | 'purchases'
+  | 'tasks'
+  | 'inspirations'
+  | 'monthlyBudgets'
+  | 'attachments'

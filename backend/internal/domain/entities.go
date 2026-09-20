@@ -8,6 +8,8 @@ var EntityTables = map[string]string{
 	"inspiration":    "inspirations",
 	"monthly_budget": "monthly_budgets",
 	"attachment":     "attachments",
+	"tag":            "tags",
+	"item_tag":       "item_tags",
 }
 
 var EntityColumns = map[string][]string{
@@ -30,8 +32,16 @@ var EntityColumns = map[string][]string{
 		"created_at", "updated_at", "deleted_at", "revision",
 	},
 	"inspiration": {
-		"id", "area", "category_id", "title", "notes", "external_url",
+		"id", "area", "item_id", "category_id", "title", "notes", "external_url",
 		"order_scope", "position", "created_at", "updated_at", "deleted_at", "revision",
+	},
+	"tag": {
+		"id", "area", "name", "position",
+		"created_at", "updated_at", "deleted_at", "revision",
+	},
+	"item_tag": {
+		"id", "item_id", "tag_id",
+		"created_at", "updated_at", "deleted_at", "revision",
 	},
 	"monthly_budget": {
 		"id", "period", "available_minor", "currency", "notes",

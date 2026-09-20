@@ -157,6 +157,43 @@ func TestAttachmentBlobRoundtrip(t *testing.T) {
 	}
 }
 
+func TestTagAndItemLinkedInspiration(t *testing.T) {
+	h := setup(t)
+	item := map[string]any{
+		"id": "item-link", "area": "casa", "name": "Mesa", "priority": 3,
+		"status": "deseado", "currency": "ARS", "order_scope": "items:casa:deseado",
+		"position": 1024,
+	}
+	tag := map[string]any{
+		"id": "tag-1", "area": "casa", "name": "oferta", "position": 1024,
+	}
+	link := map[string]any{
+		"id": "insp-item", "area": "casa", "item_id": "item-link", "title": "ML",
+		"external_url": "https://www.mercadolibre.com.ar/mesa",
+		"order_scope": "items:casa:links", "position": 1024,
+	}
+	itemTag := map[string]any{
+		"id": "it-1", "item_id": "item-link", "tag_id": "tag-1",
+	}
+	marshal := func(v map[string]any) json.RawMessage {
+		t.Helper()
+		raw, _ := json.Marshal(v)
+		return raw
+	}
+	resp := postSync(t, h, norteSync.Request{
+		DeviceID: "dev-a",
+		Mutations: []norteSync.Mutation{
+			{MutationID: "t1", EntityType: "tag", EntityID: "tag-1", Operation: "upsert", Record: marshal(tag)},
+			{MutationID: "i1", EntityType: "item", EntityID: "item-link", Operation: "upsert", Record: marshal(item)},
+			{MutationID: "l1", EntityType: "inspiration", EntityID: "insp-item", Operation: "upsert", Record: marshal(link)},
+			{MutationID: "it1", EntityType: "item_tag", EntityID: "it-1", Operation: "upsert", Record: marshal(itemTag)},
+		},
+	})
+	if len(resp.Applied) != 4 {
+		t.Fatalf("applied=%v conflicts=%v", resp.Applied, resp.Conflicts)
+	}
+}
+
 func postSync(t *testing.T, h http.Handler, reqBody norteSync.Request) norteSync.Response {
 	t.Helper()
 	raw, _ := json.Marshal(reqBody)

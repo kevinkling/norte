@@ -7,13 +7,22 @@
     <draggable
       :model-value="items"
       item-key="id"
-      handle=".handle"
       :animation="reduced ? 0 : 180"
+      :force-fallback="true"
+      :fallback-on-body="true"
+      :fallback-tolerance="8"
+      :delay="200"
+      :delay-on-touch-only="true"
+      :touch-start-threshold="4"
+      :scroll-sensitivity="80"
+      filter=".no-drag"
+      :prevent-on-filter="false"
+      ghost-class="keep-ghost"
+      chosen-class="keep-chosen"
       @update:modelValue="onUpdate"
     >
       <template #item="{ element, index: i }">
         <div class="row" :class="{ selected: i === index }" @click="$emit('select', i)">
-          <button class="handle btn" type="button" aria-label="Arrastrar para reordenar">::</button>
           <slot name="item" :element="element" :index="i" />
         </div>
       </template>
@@ -34,7 +43,8 @@ function onUpdate(next: T[]) {
 </script>
 <style scoped>
 .toolbar { display: flex; gap: 8px; margin-bottom: 8px; }
-.row { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: stretch; margin-bottom: 8px; }
-.selected { outline: 2px solid var(--accent); border-radius: 12px; }
-.handle { font-weight: 700; }
+.row { margin-bottom: 8px; touch-action: manipulation; }
+.selected :deep(.card) { outline: 2px solid var(--accent); }
+:deep(.keep-ghost) { opacity: 0.45; }
+:deep(.keep-chosen) { transform: scale(1.02); }
 </style>
