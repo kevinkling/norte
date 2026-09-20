@@ -64,6 +64,11 @@ pnpm run dev
 
 La PWA queda en http://127.0.0.1:5173 y proxea `/api` al backend.
 
+## PWA en iPhone
+Safari instala la app (Agregar a inicio) con **HTTPS** o `localhost`. En LAN hace falta un certificado o un túnel; HTTP en `http://host:8080` no alcanza para PWA “de verdad”.
+
+Hay iconos PNG (`apple-touch-icon` 180×180, 192 y 512) y metas Apple. La UI usa `system-ui` / `-apple-system`; no carga fuentes de Google.
+
 ## Docker
 ```
 docker compose up --build

@@ -9,10 +9,3 @@ export function parsePesos(input: string): number {
   if (!Number.isFinite(n)) return 0
   return Math.round(n * 100)
 }
-
-export const PRIORITY_LABEL: Record<number, string> = {
-  1: 'Alta',
-  2: 'Media-alta',
-  3: 'Media',
-  4: 'Baja',
-}

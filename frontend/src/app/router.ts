@@ -4,6 +4,7 @@ import ItemsView from '../features/items/ItemsView.vue'
 import PurchasesView from '../features/purchases/PurchasesView.vue'
 import TasksView from '../features/tasks/TasksView.vue'
 import InspirationsView from '../features/inspirations/InspirationsView.vue'
+import OrganizeView from '../features/organize/OrganizeView.vue'
 import BudgetView from '../features/budgets/BudgetView.vue'
 import ConflictsView from '../features/conflicts/ConflictsView.vue'
 
@@ -20,6 +21,7 @@ export const router = createRouter({
         { path: 'compras', component: PurchasesView },
         { path: 'tareas', component: TasksView },
         { path: 'inspiracion', component: InspirationsView },
+        { path: 'organizar', component: OrganizeView },
         { path: 'presupuesto', component: BudgetView },
         { path: 'conflictos', component: ConflictsView },
       ],

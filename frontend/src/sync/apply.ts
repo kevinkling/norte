@@ -16,6 +16,8 @@ export async function applyRemoteChanges(
     'rw',
     [
       db.categories,
+      db.tags,
+      db.itemTags,
       db.items,
       db.purchases,
       db.tasks,
@@ -31,6 +33,7 @@ export async function applyRemoteChanges(
         const table = db[tableName]
         const incoming = toCamel<Record<string, unknown>>(ch.record || { id: ch.entity_id })
         incoming.id = ch.entity_id
+        if (tableName === 'inspirations' && incoming.itemId === undefined) incoming.itemId = null
         if (tableName === 'attachments') {
           const prev = await db.attachments.get(ch.entity_id)
           if (prev?.data) incoming.data = prev.data

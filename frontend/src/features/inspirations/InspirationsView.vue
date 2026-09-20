@@ -2,7 +2,7 @@
   <section>
     <header class="head">
       <h2>Inspiración</h2>
-      <button class="btn btn-primary" type="button" @click="open = true">Nueva captura</button>
+      <button class="btn btn-primary" type="button" @click="openNew">Nuevo enlace</button>
     </header>
     <div class="chip-row">
       <button class="chip" type="button" :aria-pressed="area === 'casa'" @click="area = 'casa'">Casa</button>
@@ -12,24 +12,25 @@
       <template #item="{ element }">
         <AppCard>
           <img v-if="cover(element.id)" :src="cover(element.id)" :alt="element.title || 'Captura de inspiración'" class="shot" />
-          <p v-else class="muted">Sin captura local todavía</p>
+          <p v-else class="muted">Sin captura</p>
           <strong>{{ element.title || element.externalUrl }}</strong>
-          <div class="chip-row">
+          <div class="chip-row no-drag">
             <a class="btn" :href="element.externalUrl" target="_blank" rel="noopener noreferrer">Abrir link</a>
+            <button class="btn" type="button" @click="edit(element)">Editar</button>
             <button class="btn btn-danger" type="button" @click="remove(element.id)">Archivar</button>
           </div>
         </AppCard>
       </template>
     </SortableList>
-    <AppModal :open="open" title="Nueva inspiración" @close="open = false">
+    <AppModal :open="open" :title="editing ? 'Editar enlace' : 'Nuevo enlace'" @close="open = false">
       <form @submit.prevent="save">
-        <label class="field"><span>Título</span><input v-model="form.title" /></label>
+        <label class="field"><span>Título (opcional)</span><input v-model="form.title" /></label>
         <label class="field"><span>Área</span>
           <select v-model="form.area"><option value="casa">Casa</option><option value="auto">Auto</option></select>
         </label>
-        <label class="field"><span>Link de Instagram o Pinterest</span><input v-model="form.externalUrl" type="url" required /></label>
-        <label class="field"><span>Captura (obligatoria)</span><input type="file" accept="image/*" required @change="onFile" /></label>
-        <p class="muted">No se descarga metadata ni se incrusta el reel. Solo se guarda tu captura y el link.</p>
+        <label class="field"><span>URL</span><input v-model="form.externalUrl" type="url" required placeholder="https://…" /></label>
+        <label class="field"><span>Captura (opcional)</span><input type="file" accept="image/*" @change="onFile" /></label>
+        <p class="muted">Podés guardar solo el link. La captura queda a mano si querés una foto.</p>
         <button class="btn btn-primary" type="submit">Guardar</button>
       </form>
     </AppModal>
@@ -55,10 +56,13 @@ const rows = ref<Inspiration[]>([])
 const photos = ref<Attachment[]>([])
 const file = ref<File | null>(null)
 const urls = ref<Record<string, string>>({})
+const editing = ref<Inspiration | null>(null)
 const form = reactive({ title: '', area: 'casa' as Area, externalUrl: '' })
 
 const visible = computed(() =>
-  rows.value.filter((r) => !r.deletedAt && r.area === area.value).sort((a, b) => a.position - b.position || a.id.localeCompare(b.id)),
+  rows.value
+    .filter((r) => !r.deletedAt && r.area === area.value && !r.itemId)
+    .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id)),
 )
 function cover(id: string) { return urls.value[id] || '' }
 
@@ -72,19 +76,39 @@ watch(dataTick, async () => {
   urls.value = next
 }, { immediate: true })
 
+function openNew() {
+  editing.value = null
+  file.value = null
+  Object.assign(form, { title: '', area: area.value, externalUrl: '' })
+  open.value = true
+}
+function edit(row: Inspiration) {
+  editing.value = row
+  file.value = null
+  Object.assign(form, { title: row.title, area: row.area, externalUrl: row.externalUrl })
+  open.value = true
+}
 function onFile(e: Event) { file.value = (e.target as HTMLInputElement).files?.[0] ?? null }
 
 async function save() {
-  if (!file.value) return
-  const id = newId()
+  const id = editing.value?.id ?? newId()
   const rec: Inspiration = {
-    id, area: form.area, categoryId: null, title: form.title, notes: '',
-    externalUrl: form.externalUrl, orderScope: inspirationScope(form.area),
-    position: positionAfter(visible.value.at(-1)?.position),
-    createdAt: nowIso(), updatedAt: nowIso(), deletedAt: null, revision: 0,
+    id,
+    area: form.area,
+    itemId: null,
+    categoryId: editing.value?.categoryId ?? null,
+    title: form.title,
+    notes: editing.value?.notes ?? '',
+    externalUrl: form.externalUrl,
+    orderScope: inspirationScope(form.area),
+    position: editing.value?.position ?? positionAfter(visible.value.at(-1)?.position),
+    createdAt: editing.value?.createdAt ?? nowIso(),
+    updatedAt: nowIso(),
+    deletedAt: null,
+    revision: editing.value?.revision ?? 0,
   }
   await mutateDomain({ entityType: 'inspiration', entityId: id, operation: 'upsert', table: 'inspirations', record: rec as unknown as Record<string, unknown> })
-  await savePhoto({ file: file.value, role: 'cover', inspirationId: id })
+  if (file.value) await savePhoto({ file: file.value, role: 'cover', inspirationId: id })
   open.value = false
   file.value = null
 }

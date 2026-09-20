@@ -14,4 +14,4 @@ Los IDs se generan en el cliente (UUID v7). Cada fila sincronizable tiene `revis
 Las fotos viajan por `PUT/GET /api/v1/attachments/{id}/content`. El JSON de sync no incluye BLOBs.
 
 ## Orden
-`position` REAL por `order_scope`. Solo se actualiza el ítem movido, salvo rebalanceo cuando el hueco es menor a 1e-9.
+`position` REAL por `order_scope`. Solo se actualiza el ítem movido, salvo rebalanceo cuando el hueco es menor a 1e-9. Las entidades sincronizables incluyen categorías, etiquetas, `item_tags` e inspiraciones (sueltas o con `item_id`).

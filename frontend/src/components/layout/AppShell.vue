@@ -7,6 +7,7 @@
     </div>
     <div class="actions">
       <RouterLink v-if="sync.conflicts" to="/conflictos" class="btn">Conflictos ({{ sync.conflicts }})</RouterLink>
+      <RouterLink to="/organizar" class="btn">Etiquetas</RouterLink>
       <span class="status" :title="statusLabel">
         <span class="dot" :data-status="sync.status" aria-hidden="true"></span>
         <span class="sr-only">{{ statusLabel }}</span>

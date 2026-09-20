@@ -12,16 +12,19 @@
     <SortableList :items="visible" :index="selected" @update:items="reorder" @select="selected = $event" @move="nudge">
       <template #item="{ element }">
         <AppCard>
-          <label class="done">
+          <label class="done no-drag">
             <input type="checkbox" :checked="element.status === 'completada'" @change="toggle(element)" />
             <strong>{{ element.title }}</strong>
           </label>
           <p class="muted">{{ element.dueOn || 'Sin fecha' }} {{ element.recurrenceRule ? '· Recurrente' : '' }}</p>
-          <button class="btn btn-danger" type="button" @click="remove(element.id)">Archivar</button>
+          <div class="chip-row no-drag">
+            <button class="btn" type="button" @click="edit(element)">Editar</button>
+            <button class="btn btn-danger" type="button" @click="remove(element.id)">Archivar</button>
+          </div>
         </AppCard>
       </template>
     </SortableList>
-    <AppModal :open="open" title="Nueva tarea" @close="open = false">
+    <AppModal :open="open" :title="editing ? 'Editar tarea' : 'Nueva tarea'" @close="open = false">
       <form @submit.prevent="save">
         <label class="field"><span>Título</span><input v-model="form.title" required /></label>
         <label class="field"><span>Área</span>
@@ -57,6 +60,7 @@ const showDone = ref(false)
 const tasks = ref<Task[]>([])
 const selected = ref(-1)
 const open = ref(false)
+const editing = ref<Task | null>(null)
 const form = reactive({ title: '', area: 'casa' as Area, dueOn: '', recurrenceRule: '', notes: '' })
 
 const visible = computed(() =>
@@ -67,15 +71,40 @@ const visible = computed(() =>
 
 watch(dataTick, async () => { tasks.value = await db.tasks.toArray() }, { immediate: true })
 
-function openNew() { open.value = true }
+function resetForm() {
+  Object.assign(form, { title: '', area: area.value, dueOn: '', recurrenceRule: '', notes: '' })
+}
+function openNew() {
+  editing.value = null
+  resetForm()
+  open.value = true
+}
+function edit(task: Task) {
+  editing.value = task
+  Object.assign(form, {
+    title: task.title, area: task.area, dueOn: task.dueOn ?? '',
+    recurrenceRule: task.recurrenceRule ?? '', notes: task.notes,
+  })
+  open.value = true
+}
 async function save() {
-  const id = newId()
+  const id = editing.value?.id ?? newId()
   const rec: Task = {
-    id, area: form.area, title: form.title, notes: form.notes, dueOn: form.dueOn || null,
-    recurrenceRule: form.recurrenceRule || null, recurrenceRootId: null, status: 'pendiente',
-    completedAt: null, orderScope: taskScope(form.area, 'pendiente'),
-    position: positionAfter(visible.value.at(-1)?.position),
-    createdAt: nowIso(), updatedAt: nowIso(), deletedAt: null, revision: 0,
+    id,
+    area: form.area,
+    title: form.title,
+    notes: form.notes,
+    dueOn: form.dueOn || null,
+    recurrenceRule: form.recurrenceRule || null,
+    recurrenceRootId: editing.value?.recurrenceRootId ?? null,
+    status: editing.value?.status ?? 'pendiente',
+    completedAt: editing.value?.completedAt ?? null,
+    orderScope: editing.value ? taskScope(form.area, editing.value.status) : taskScope(form.area, 'pendiente'),
+    position: editing.value?.position ?? positionAfter(visible.value.at(-1)?.position),
+    createdAt: editing.value?.createdAt ?? nowIso(),
+    updatedAt: nowIso(),
+    deletedAt: null,
+    revision: editing.value?.revision ?? 0,
   }
   await mutateDomain({ entityType: 'task', entityId: id, operation: 'upsert', table: 'tasks', record: rec as unknown as Record<string, unknown> })
   open.value = false
@@ -87,8 +116,9 @@ async function toggle(task: Task) {
       entityType: 'task', entityId: task.id, operation: 'upsert', table: 'tasks',
       record: { ...task, status: 'completada', completedAt: nowIso(), orderScope: taskScope(task.area, 'completada') } as unknown as Record<string, unknown>,
     })
-    if (task.recurrenceRule && task.dueOn) {
-      const nextDue = addInterval(task.dueOn, task.recurrenceRule)
+    if (task.recurrenceRule) {
+      const base = task.dueOn || nowIso().slice(0, 10)
+      const nextDue = addInterval(base, task.recurrenceRule)
       if (nextDue) {
         const id = newId()
         const rec: Task = {

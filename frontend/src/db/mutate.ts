@@ -1,7 +1,7 @@
 import { db } from './norte.db'
 import { newId, nowIso } from './ids'
 import { toSnake } from '../sync/map'
-import type { EntityType, OutboxEntry } from './types'
+import type { DomainTableName, EntityType, OutboxEntry } from './types'
 import { notifyDataChanged } from '../app/bus'
 import { scheduleSync } from '../sync/runner'
 
@@ -9,7 +9,7 @@ export async function mutateDomain(opts: {
   entityType: EntityType
   entityId: string
   operation: 'upsert' | 'delete'
-  table: 'categories' | 'items' | 'purchases' | 'tasks' | 'inspirations' | 'monthlyBudgets' | 'attachments'
+  table: DomainTableName
   record: Record<string, unknown>
 }): Promise<void> {
   const now = nowIso()
