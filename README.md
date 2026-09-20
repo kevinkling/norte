@@ -8,8 +8,10 @@ Organizador personal offline-first: ítems, compras, tareas, inspiración y pres
 - Los servicios se registran como **tareas**.
 - Cada ítem admite únicamente un **mes estimado**; no se planifican fechas exactas.
 - El presupuesto se define y consulta por **mes**.
-- Un ítem puede tener varias inspiraciones o enlaces, y también se pueden guardar enlaces sueltos sin asociarlos a un ítem.
-- El orden de los ítems es manual mediante arrastrar y soltar; no existe un campo de prioridad.
+- Un ítem puede tener varias inspiraciones o enlaces, y también se pueden
+  guardar enlaces sueltos sin asociarlos a un ítem.
+- El orden de los ítems es manual mediante arrastrar y soltar; no existe un
+  campo de prioridad.
 
 ## Alcance futuro
 
