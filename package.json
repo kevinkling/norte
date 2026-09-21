@@ -5,6 +5,6 @@
     "dev": "pnpm --dir frontend dev",
     "build": "pnpm --dir frontend build",
     "test": "pnpm --dir frontend test",
-    "dev:api": "go run ./backend/cmd/norte-api"
+    "dev:api": "node scripts/dev-api.mjs"
   }
 }
