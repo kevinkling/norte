@@ -26,11 +26,14 @@ Fuera del MVP quedan estas capacidades:
 - SQLite 3.38+ (opcional en host; el API crea y migra la base)
 
 ## Base de datos
-La SQLite vive en `data/norte.db`. El API la crea y aplica migraciones al arrancar.
+La SQLite vive en `data/norte.db` (raíz del repo). El API la crea y aplica migraciones al arrancar.
+El módulo Go está en `backend/`; `go run` tiene que ejecutarse ahí:
 
 ```
-go run ./backend/cmd/norte-api
+go -C backend run ./cmd/norte-api
 ```
+
+`pnpm run dev:api` hace eso. Si no definís `SQLITE_PATH`, apunta la base a `data/norte.db` de la raíz (un `go -C` suelto dejaría el directorio de trabajo en `backend/`).
 
 Variables (ver `.env.example`):
 - `SQLITE_PATH=data/norte.db`
@@ -74,6 +77,7 @@ Hay iconos PNG (`apple-touch-icon` 180×180, 192 y 512) y metas Apple. La UI usa
 docker compose up --build
 ```
 Nginx sirve la PWA en http://localhost:8080 y enruta `/api` al contenedor Go. El volumen `./data` persiste SQLite.
+La imagen web instala con `npm ci` y `frontend/package-lock.json`. `frontend/.dockerignore` deja fuera `node_modules` y los artefactos de build del host.
 
 ## Backup
 Ver [docs/DEPLOY.md](docs/DEPLOY.md). Contrato de sync: [docs/architecture.md](docs/architecture.md).
