@@ -10,7 +10,7 @@ import ConflictsView from '../features/conflicts/ConflictsView.vue'
 import MoreView from '../features/more/MoreView.vue'
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
