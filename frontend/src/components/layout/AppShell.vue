@@ -179,28 +179,38 @@ function changeArea(area: 'casa' | 'auto') {
 }
 
 .top, .bottom {
+  --shell-gap: 12px;
+  --shell-bar: 64px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
   position: fixed;
   z-index: 100;
-  left: 12px;
-  right: 12px;
+  left: calc(var(--shell-gap) + var(--safe-left));
+  right: calc(var(--shell-gap) + var(--safe-right));
 }
 .top {
-  top: 12px;
+  top: calc(var(--shell-gap) + var(--safe-top));
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  height: 64px;
+  min-height: var(--shell-bar);
+  height: auto;
+  box-sizing: border-box;
 }
 .bottom {
-  bottom: 12px;
+  bottom: calc(var(--shell-gap) + var(--safe-bottom));
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 4px;
   padding: 6px;
   border-radius: 22px;
-  height: 64px;
+  min-height: var(--shell-bar);
+  height: auto;
+  box-sizing: border-box;
 }
 .brand {
   display: grid;
@@ -276,10 +286,21 @@ h1 {
 }
 
 main {
-  padding: 88px 12px 96px;
+  /* Reserva espacio para barras fijas + safe areas (notch / home indicator) */
+  --shell-gap: 12px;
+  --shell-bar: 64px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --main-pad-top: calc(var(--shell-gap) + var(--safe-top) + var(--shell-bar) + var(--shell-gap));
+  --main-pad-bottom: calc(var(--shell-gap) + var(--safe-bottom) + var(--shell-bar) + 20px);
+  padding: var(--main-pad-top) calc(12px + var(--safe-right)) var(--main-pad-bottom) calc(12px + var(--safe-left));
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
+  min-height: 100dvh;
+  box-sizing: border-box;
 }
 
 .nav-item {
