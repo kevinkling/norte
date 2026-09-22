@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useUiStore = defineStore('ui', {
   state: () => ({
     theme: (localStorage.getItem('norte-theme') as 'light' | 'dark') || 'light',
+    area: (localStorage.getItem('norte-area') as 'casa' | 'auto') || 'casa',
     search: '',
   }),
   actions: {
@@ -13,6 +14,10 @@ export const useUiStore = defineStore('ui', {
     },
     applyTheme() {
       document.documentElement.dataset.theme = this.theme
+    },
+    setArea(area: 'casa' | 'auto') {
+      this.area = area
+      localStorage.setItem('norte-area', area)
     },
   },
 })

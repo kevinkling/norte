@@ -30,7 +30,7 @@ export type SyncResponse = {
   blob_upload_required: string[]
 }
 
-const API = '/api/v1'
+const API = `${import.meta.env.VITE_API_BASE_URL ?? ''}/api/v1`
 
 export async function postSync(deviceId: string, cursor: number, mutations: SyncMutation[], limit = 200): Promise<SyncResponse> {
   const res = await fetch(`${API}/sync`, {

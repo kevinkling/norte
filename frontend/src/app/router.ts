@@ -7,6 +7,7 @@ import InspirationsView from '../features/inspirations/InspirationsView.vue'
 import OrganizeView from '../features/organize/OrganizeView.vue'
 import BudgetView from '../features/budgets/BudgetView.vue'
 import ConflictsView from '../features/conflicts/ConflictsView.vue'
+import MoreView from '../features/more/MoreView.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -24,6 +25,7 @@ export const router = createRouter({
         { path: 'organizar', component: OrganizeView },
         { path: 'presupuesto', component: BudgetView },
         { path: 'conflictos', component: ConflictsView },
+        { path: 'mas', component: MoreView },
       ],
     },
   ],
