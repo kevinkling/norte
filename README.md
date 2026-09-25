@@ -27,21 +27,20 @@ Fuera del MVP quedan estas capacidades:
 
 ## Base de datos
 La SQLite vive en `data/norte.db` (raíz del repo). El API la crea y aplica migraciones al arrancar.
-El módulo Go está en `backend/`; `go run` tiene que ejecutarse ahí:
+
+El backend se levanta **solo** con:
 
 ```
-go -C backend run ./cmd/norte-api
+pnpm run dev:api
 ```
 
-`pnpm run dev:api` hace eso. Si no definís `SQLITE_PATH`, apunta la base a `data/norte.db` de la raíz (un `go -C` suelto dejaría el directorio de trabajo en `backend/`).
+Eso corre Go desde `backend/` y, si no definís `SQLITE_PATH`, usa `data/norte.db` de la raíz.
 
 Variables (ver `.env.example`):
 - `SQLITE_PATH=data/norte.db`
 - `PORT=8080`
 - `TOMBSTONE_TTL_DAYS=90`
 - `MAX_UPLOAD_BYTES=10485760`
-
-No publiques este API en Internet: no tiene autenticación. Usalo en LAN o VPN.
 
 ## Desarrollo
 Desde la raíz del repo:
@@ -72,12 +71,8 @@ Safari instala la app (Agregar a inicio) con **HTTPS** o `localhost`. En LAN hac
 
 Hay iconos PNG (`apple-touch-icon` 180×180, 192 y 512) y metas Apple. La UI usa `system-ui` / `-apple-system`; no carga fuentes de Google.
 
-## Docker
-```
-docker compose up --build
-```
-Nginx sirve la PWA en http://localhost:8080 y enruta `/api` al contenedor Go. El volumen `./data` persiste SQLite.
-La imagen web instala con `npm ci` y `frontend/package-lock.json`. `frontend/.dockerignore` deja fuera `node_modules` y los artefactos de build del host.
+## Producción
+Frontend en GitHub Pages (`https://kevinkling.github.io/norte/`). Backend en esta PC (`pnpm run dev:api`) y Tailscale Funnel hacia el puerto 8080.
 
 ## Backup
 Ver [docs/DEPLOY.md](docs/DEPLOY.md). Contrato de sync: [docs/architecture.md](docs/architecture.md).

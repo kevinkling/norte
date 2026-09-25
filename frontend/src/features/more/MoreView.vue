@@ -41,6 +41,9 @@
       </div>
       <p v-if="sync.pending > 0" class="pending-text">{{ sync.pending }} cambios pendientes de subir</p>
       <p v-if="sync.lastSyncAt" class="sync-time">Última sincronización: {{ formatTime(sync.lastSyncAt) }}</p>
+      <button class="btn" type="button" :disabled="sync.status === 'syncing'" @click="onSync">
+        {{ sync.status === 'syncing' ? 'Sincronizando…' : 'Sincronizar ahora' }}
+      </button>
     </div>
   </section>
 </template>
@@ -48,8 +51,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useSyncStore } from '../../stores/sync'
+import { runSync } from '../../sync/runner'
 
 const sync = useSyncStore()
+
+function onSync() {
+  void runSync()
+}
 
 const statusLabel = computed(() => {
   if (sync.status === 'syncing') return 'Sincronizando...'

@@ -64,6 +64,7 @@
     </nav>
 
     <div class="sidebar-footer">
+      <SyncButton variant="row" />
       <button class="theme-btn" type="button" @click="ui.toggleTheme()" :aria-label="ui.theme === 'light' ? 'Modo oscuro' : 'Modo claro'">
         <svg v-if="ui.theme === 'dark'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="4"/>
@@ -91,6 +92,7 @@
     </div>
 
     <div class="actions">
+      <SyncButton />
       <button class="theme-btn" type="button" @click="ui.toggleTheme()" :aria-label="ui.theme === 'light' ? 'Modo oscuro' : 'Modo claro'">
         <svg v-if="ui.theme === 'dark'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="4"/>
@@ -157,6 +159,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
+import SyncButton from './SyncButton.vue'
 import { useSyncStore } from '../../stores/sync'
 import { useUiStore } from '../../stores/ui'
 
