@@ -23,9 +23,23 @@ export async function ensureDeviceId(): Promise<string> {
   return id
 }
 
+function apiConfigured(): boolean {
+  const base = import.meta.env.VITE_API_BASE_URL
+  if (typeof base === 'string' && base.trim() !== '') return true
+  // En GitHub Pages no hay proxy /api: no dispares POST al hosting estático.
+  return !location.hostname.endsWith('github.io')
+}
+
 export async function runSync(): Promise<void> {
   if (running) return
   const store = useSyncStore()
+  if (!apiConfigured()) {
+    store.status = 'offline'
+    store.lastError = 'API no configurada'
+    store.pending = await db.outbox.count()
+    store.conflicts = await db.conflicts.filter((c) => !c.resolution).count()
+    return
+  }
   if (!navigator.onLine) {
     store.status = 'offline'
     store.pending = await db.outbox.count()

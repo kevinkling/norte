@@ -1,6 +1,14 @@
 # Despliegue y mantenimiento — Norte
 
-El API no tiene autenticación. Exponelo solo en red local o VPN.
+El API **no tiene autenticación**. Tailscale Funnel lo deja en internet público.
+
+Frontend (GitHub Pages): `https://kevinkling.github.io/norte/`
+Backend (Funnel → esta PC, puerto 8080): `https://korus-1.tail7548d8.ts.net`
+
+Para que el frontend sincronice:
+1. Dejá el API corriendo en `:8080` (`go -C backend run ./cmd/norte-api`).
+2. Funnel persistente: `tailscale funnel --bg 8080`.
+3. En Actions, el build usa esa URL por defecto (secret `VITE_API_BASE_URL` la pisa si existe).
 
 ## Backup de SQLite
 1. Detener escrituras (`docker compose stop api` o cerrar el proceso).

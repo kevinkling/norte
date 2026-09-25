@@ -8,6 +8,8 @@ data/*.db-wal
 data/*.db-shm
 data/change_log.jsonl
 .env
+*.crt
+*.key
 .DS_Store
 .vscode/
 coverage/
