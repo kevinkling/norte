@@ -22,25 +22,17 @@ Fuera del MVP quedan estas capacidades:
 
 ## Requisitos
 - Node 22+
-- Go 1.22+
-- SQLite 3.38+ (opcional en host; el API crea y migra la base)
+- Un proyecto Supabase con la migración de `supabase/migrations` aplicada
 
-## Base de datos
-La SQLite vive en `data/norte.db` (raíz del repo). El API la crea y aplica migraciones al arrancar.
+## Datos
+IndexedDB es la copia local. Supabase (Postgres + Storage) replica entre dispositivos. No hace falta levantar un API.
 
-El backend se levanta **solo** con:
+Copiá `frontend/.env.example` a `frontend/.env` y completá:
 
-```
-pnpm run dev:api
-```
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-Eso corre Go desde `backend/` y, si no definís `SQLITE_PATH`, usa `data/norte.db` de la raíz.
-
-Variables (ver `.env.example`):
-- `SQLITE_PATH=data/norte.db`
-- `PORT=8080`
-- `TOMBSTONE_TTL_DAYS=90`
-- `MAX_UPLOAD_BYTES=10485760`
+Sin esas variables la app abre igual y no sincroniza.
 
 ## Desarrollo
 Desde la raíz del repo:
@@ -50,21 +42,7 @@ pnpm install
 pnpm run dev
 ```
 
-En otra terminal, la API:
-
-```
-pnpm run dev:api
-```
-
-Si preferís entrar al frontend:
-
-```
-cd frontend
-pnpm install
-pnpm run dev
-```
-
-La PWA queda en http://127.0.0.1:5173 y proxea `/api` al backend.
+La PWA queda en http://127.0.0.1:5173.
 
 ## PWA en iPhone
 Safari instala la app (Agregar a inicio) con **HTTPS** o `localhost`. En LAN hace falta un certificado o un túnel; HTTP en `http://host:8080` no alcanza para PWA “de verdad”.
@@ -72,7 +50,7 @@ Safari instala la app (Agregar a inicio) con **HTTPS** o `localhost`. En LAN hac
 Hay iconos PNG (`apple-touch-icon` 180×180, 192 y 512) y metas Apple. La UI usa `system-ui` / `-apple-system`; no carga fuentes de Google.
 
 ## Producción
-Frontend en GitHub Pages (`https://kevinkling.github.io/norte/`). Backend en esta PC (`pnpm run dev:api`) y Tailscale Funnel hacia el puerto 8080.
+Frontend en GitHub Pages (`https://kevinkling.github.io/norte/`). El build necesita los secrets `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. Las fotos van al bucket `attachments` (máximo 10 MB; jpeg, png, webp, gif o heic).
 
 ## Backup
 Ver [docs/DEPLOY.md](docs/DEPLOY.md). Contrato de sync: [docs/architecture.md](docs/architecture.md).

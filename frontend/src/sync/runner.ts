@@ -2,7 +2,7 @@ import { db } from '../db/norte.db'
 import { newId } from '../db/ids'
 import { applyRemoteChanges, storeConflicts } from './apply'
 import { flushBlobs } from './blobs'
-import { postSync } from './client'
+import { postSync, supabaseConfigured } from './client'
 import { useSyncStore } from '../stores/sync'
 
 let timer: number | null = null
@@ -24,10 +24,7 @@ export async function ensureDeviceId(): Promise<string> {
 }
 
 function apiConfigured(): boolean {
-  const base = import.meta.env.VITE_API_BASE_URL
-  if (typeof base === 'string' && base.trim() !== '') return true
-  // En GitHub Pages no hay proxy /api: no dispares POST al hosting estático.
-  return !location.hostname.endsWith('github.io')
+  return supabaseConfigured()
 }
 
 export async function runSync(): Promise<void> {
@@ -35,7 +32,7 @@ export async function runSync(): Promise<void> {
   const store = useSyncStore()
   if (!apiConfigured()) {
     store.status = 'offline'
-    store.lastError = 'API no configurada'
+    store.lastError = 'Supabase no configurado'
     store.pending = await db.outbox.count()
     store.conflicts = await db.conflicts.filter((c) => !c.resolution).count()
     return

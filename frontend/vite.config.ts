@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // En GitHub Pages (proyecto, no dominio custom) la app vive en /<repo>/.
 // GitHub Actions define VITE_BASE_PATH=/norte/ al hacer build para Pages.
-// En desarrollo local y en Docker/Nginx queda '/'.
+// En desarrollo local queda '/'.
 const base = process.env.VITE_BASE_PATH ?? '/'
 
 export default defineConfig({
@@ -32,19 +32,10 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: `${base}index.html`,
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
-            handler: 'NetworkOnly',
-          },
-        ],
       },
     }),
   ],
   server: {
     port: 5173,
-    proxy: {
-      '/api': 'http://127.0.0.1:8080',
-    },
   },
 })

@@ -15,7 +15,7 @@ function cat(
   }
 }
 
-/** IDs fijos: coinciden con `backend/internal/database/migrations/002_seed.sql`. */
+/** IDs fijos del seed local. */
 export const SEED_CATEGORIES: Category[] = [
   cat('01993e10-0000-7000-8000-000000000010', 'casa', 'Muebles', null, 1024),
   cat('01993e10-0000-7000-8000-000000000011', 'casa', 'Living', '01993e10-0000-7000-8000-000000000010', 1024),

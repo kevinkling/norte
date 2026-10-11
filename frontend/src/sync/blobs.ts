@@ -11,7 +11,11 @@ export async function flushBlobs(deviceId: string): Promise<void> {
   const rows = await db.attachments.filter((a) => !a.deletedAt).toArray()
   for (const att of rows) {
     if (att.contentState !== 'ready' && att.data) {
-      await putAttachment(att.id, att.data, deviceId)
+      await putAttachment(att.id, att.data, deviceId, {
+        sha256: att.sha256,
+        byteSize: att.byteSize,
+        mimeType: att.mimeType,
+      })
       await db.attachments.update(att.id, { contentState: 'ready' })
     } else if (att.contentState === 'ready' && !att.data) {
       try {

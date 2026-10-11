@@ -4,7 +4,12 @@
   "scripts": {
     "dev": "pnpm --dir frontend dev",
     "build": "pnpm --dir frontend build",
-    "test": "pnpm --dir frontend test",
-    "dev:api": "node scripts/dev-api.mjs"
+    "test": "pnpm --dir frontend test"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "vue-demi"
+    ]
   }
 }
