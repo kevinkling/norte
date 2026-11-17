@@ -5,6 +5,7 @@ import type { Item } from '../../db/types'
 function item(partial: Partial<Item> & { id: string; estimatedCostMinor: number }): Item {
   return {
     area: 'casa',
+    listId: null,
     name: partial.id,
     categoryId: null,
     description: '',

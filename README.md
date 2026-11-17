@@ -4,7 +4,13 @@ Organizador personal offline-first: ítems, compras, tareas, inspiración y pres
 
 ## Alcance confirmado del MVP
 
-- La organización usa **categorías y etiquetas**, no proyectos.
+- Todo se agrupa en **listas propias** (Casa, Auto, Setup…). Cada lista mezcla
+  cosas **para comprar** (ítems) y **para hacer** (tareas), con alta rápida.
+- La **Bandeja** junta lo que todavía no tiene lista, por ejemplo los links
+  guardados desde Instagram, Pinterest o Mercado Libre con el
+  [Atajo de iOS](docs/atajo-ios.md).
+- **Para comprar** muestra todo lo pendiente de compra contra el presupuesto del mes.
+- Las categorías y etiquetas son globales y opcionales.
 - Los servicios se registran como **tareas**.
 - Cada ítem admite únicamente un **mes estimado**; no se planifican fechas exactas.
 - El presupuesto se define y consulta por **mes**.

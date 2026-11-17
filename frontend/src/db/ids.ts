@@ -13,14 +13,17 @@ export function currentMonth(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-export function itemScope(area: string, status: string): string {
-  return `items:${area}:${status}`
+/** Clave de la Bandeja en los scopes de orden (listId null). */
+export const INBOX = 'inbox'
+
+export function itemScope(listId: string | null, status: string): string {
+  return `items:${listId ?? INBOX}:${status}`
 }
 
-export function taskScope(area: string, status: string): string {
-  return `tasks:${area}:${status}`
+export function taskScope(listId: string | null, status: string): string {
+  return `tasks:${listId ?? INBOX}:${status}`
 }
 
-export function inspirationScope(area: string): string {
-  return `inspirations:${area}`
+export function inspirationScope(listId: string | null): string {
+  return `inspirations:${listId ?? INBOX}`
 }

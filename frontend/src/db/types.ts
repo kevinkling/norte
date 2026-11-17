@@ -12,6 +12,7 @@ export type EntityType =
   | 'attachment'
   | 'tag'
   | 'item_tag'
+  | 'list'
 
 export interface SyncMeta {
   id: string
@@ -19,6 +20,12 @@ export interface SyncMeta {
   updatedAt: string
   deletedAt: string | null
   revision: number
+}
+
+export interface List extends SyncMeta {
+  name: string
+  emoji: string
+  position: number
 }
 
 export interface Category extends SyncMeta {
@@ -40,7 +47,9 @@ export interface ItemTag extends SyncMeta {
 }
 
 export interface Item extends SyncMeta {
-  area: Area
+  area: Area | null
+  /** null = Bandeja */
+  listId: string | null
   name: string
   categoryId: string | null
   description: string
@@ -63,7 +72,9 @@ export interface Purchase extends SyncMeta {
 }
 
 export interface Task extends SyncMeta {
-  area: Area
+  area: Area | null
+  /** null = Bandeja */
+  listId: string | null
   title: string
   notes: string
   dueOn: string | null
@@ -76,7 +87,9 @@ export interface Task extends SyncMeta {
 }
 
 export interface Inspiration extends SyncMeta {
-  area: Area
+  area: Area | null
+  /** null = Bandeja */
+  listId: string | null
   itemId: string | null
   categoryId: string | null
   title: string
@@ -137,6 +150,7 @@ export interface ConflictRow {
 }
 
 export type DomainRecord =
+  | List
   | Category
   | Tag
   | ItemTag
@@ -148,6 +162,7 @@ export type DomainRecord =
   | Attachment
 
 export type DomainTableName =
+  | 'lists'
   | 'categories'
   | 'tags'
   | 'itemTags'

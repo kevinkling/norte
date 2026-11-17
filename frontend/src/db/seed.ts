@@ -1,4 +1,4 @@
-import type { Category } from './types'
+import type { Category, List } from './types'
 
 const ts = '2026-09-13T20:00:00.000Z'
 
@@ -31,3 +31,20 @@ export const SEED_CATEGORIES: Category[] = [
   cat('01993e10-0000-7000-8000-000000000140', 'auto', 'Limpieza', null, 4096),
   cat('01993e10-0000-7000-8000-000000000150', 'auto', 'Documentación', null, 5120),
 ]
+
+export const LIST_CASA_ID = '01993e10-0000-7000-8000-000000000201'
+export const LIST_AUTO_ID = '01993e10-0000-7000-8000-000000000202'
+
+const listTs = '2026-11-17T00:00:00.000Z'
+
+/** Listas iniciales; mismos IDs que la migración 20261117000000_lists.sql. */
+export const SEED_LISTS: List[] = [
+  { id: LIST_CASA_ID, name: 'Casa', emoji: '🏠', position: 1024, createdAt: listTs, updatedAt: listTs, deletedAt: null, revision: 1 },
+  { id: LIST_AUTO_ID, name: 'Auto', emoji: '🚗', position: 2048, createdAt: listTs, updatedAt: listTs, deletedAt: null, revision: 1 },
+]
+
+export function listIdForArea(area: string | null | undefined): string | null {
+  if (area === 'casa') return LIST_CASA_ID
+  if (area === 'auto') return LIST_AUTO_ID
+  return null
+}

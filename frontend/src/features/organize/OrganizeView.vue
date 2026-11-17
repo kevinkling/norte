@@ -74,11 +74,9 @@ import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
 import { newId, nowIso } from '../../db/ids'
 import { mutateDomain } from '../../db/mutate'
-import { useUiStore } from '../../stores/ui'
 import type { Category, Tag } from '../../db/types'
 import { positionAfter } from '../../utils/position'
 
-const ui = useUiStore()
 const cats = ref<Category[]>([])
 const tags = ref<Tag[]>([])
 const catName = ref('')
@@ -88,12 +86,12 @@ const editingTag = ref<Tag | null>(null)
 
 const visibleCats = computed(() =>
   cats.value
-    .filter((c) => !c.deletedAt && (c.area === ui.area || c.area === 'both'))
+    .filter((c) => !c.deletedAt)
     .sort((a, b) => a.position - b.position || a.name.localeCompare(b.name)),
 )
 const visibleTags = computed(() =>
   tags.value
-    .filter((t) => !t.deletedAt && (t.area === ui.area || t.area === 'both'))
+    .filter((t) => !t.deletedAt)
     .sort((a, b) => a.position - b.position || a.name.localeCompare(b.name)),
 )
 
@@ -117,7 +115,7 @@ async function saveCategory() {
   const id = existing?.id ?? newId()
   const rec: Category = {
     id,
-    area: existing?.area ?? ui.area,
+    area: existing?.area ?? 'both',
     name,
     parentId: existing?.parentId ?? null,
     position: existing?.position ?? positionAfter(visibleCats.value.at(-1)?.position),
@@ -155,7 +153,7 @@ async function saveTag() {
   const id = existing?.id ?? newId()
   const rec: Tag = {
     id,
-    area: existing?.area ?? ui.area,
+    area: existing?.area ?? 'both',
     name,
     position: existing?.position ?? positionAfter(visibleTags.value.at(-1)?.position),
     createdAt: existing?.createdAt ?? nowIso(),

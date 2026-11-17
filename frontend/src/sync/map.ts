@@ -1,4 +1,4 @@
-import type { Attachment, Category, EntityType, Inspiration, Item, ItemTag, MonthlyBudget, Purchase, Tag, Task } from '../db/types'
+import type { Attachment, Category, List, EntityType, Inspiration, Item, ItemTag, MonthlyBudget, Purchase, Tag, Task } from '../db/types'
 
 const camelToSnake: Record<string, string> = {
   parentId: 'parent_id',
@@ -25,6 +25,7 @@ const camelToSnake: Record<string, string> = {
   byteSize: 'byte_size',
   contentState: 'content_state',
   tagId: 'tag_id',
+  listId: 'list_id',
 }
 
 const snakeToCamel = Object.fromEntries(Object.entries(camelToSnake).map(([k, v]) => [v, k]))
@@ -48,6 +49,7 @@ export function toCamel<T>(record: Record<string, unknown>): T {
 }
 
 export type DomainTable =
+  | 'lists'
   | 'categories'
   | 'tags'
   | 'itemTags'
@@ -59,6 +61,7 @@ export type DomainTable =
   | 'attachments'
 
 export const entityTable: Record<EntityType, DomainTable> = {
+  list: 'lists',
   category: 'categories',
   tag: 'tags',
   item_tag: 'itemTags',
@@ -70,4 +73,4 @@ export const entityTable: Record<EntityType, DomainTable> = {
   attachment: 'attachments',
 }
 
-export type AnyDomain = Category | Tag | ItemTag | Item | Purchase | Task | Inspiration | MonthlyBudget | Attachment
+export type AnyDomain = List | Category | Tag | ItemTag | Item | Purchase | Task | Inspiration | MonthlyBudget | Attachment

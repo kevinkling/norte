@@ -58,10 +58,10 @@
     <AppModal :open="open" :title="editing ? 'Editar enlace' : 'Nuevo enlace'" @close="open = false">
       <form class="form" @submit.prevent="save">
         <label class="field"><span>Título (opcional)</span><input v-model="form.title" placeholder="Ej. Alzada de cocina" /></label>
-        <label class="field"><span>Área</span>
-          <select v-model="form.area">
-            <option value="casa">Casa</option>
-            <option value="auto">Auto</option>
+        <label class="field"><span>Lista</span>
+          <select v-model="form.listId">
+            <option :value="null">📥 Bandeja</option>
+            <option v-for="l in lists" :key="l.id" :value="l.id">{{ listLabel(l) }}</option>
           </select>
         </label>
         <label class="field"><span>URL</span><input v-model="form.externalUrl" type="url" required placeholder="https://…" /></label>
@@ -87,7 +87,8 @@ import { inspirationScope, newId, nowIso } from '../../db/ids'
 import { mutateDomain } from '../../db/mutate'
 import { objectUrl, savePhoto } from '../../db/photos'
 import { useUiStore } from '../../stores/ui'
-import type { Attachment, Inspiration } from '../../db/types'
+import type { Attachment, Inspiration, List } from '../../db/types'
+import { listLabel, liveLists } from '../lists/actions'
 import { needsRebalance, positionAfter, positionForMove, rebalancePositions } from '../../utils/position'
 
 const ui = useUiStore()
@@ -100,11 +101,12 @@ const file = ref<File | null>(null)
 const urls = ref<Record<string, string>>({})
 const activeInspiration = ref<Inspiration | null>(null)
 const editing = ref<Inspiration | null>(null)
-const form = reactive({ title: '', area: ui.area, externalUrl: '' })
+const lists = ref<List[]>([])
+const form = reactive({ title: '', listId: ui.currentListId as string | null, externalUrl: '' })
 
 const visible = computed(() =>
   rows.value
-    .filter((r) => !r.deletedAt && r.area === ui.area && !r.itemId)
+    .filter((r) => !r.deletedAt && !r.itemId)
     .sort((a, b) => a.position - b.position || a.id.localeCompare(b.id)),
 )
 
@@ -120,6 +122,7 @@ function getDomain(url: string) {
 }
 
 watch(dataTick, async () => {
+  lists.value = await liveLists()
   rows.value = await db.inspirations.toArray()
   photos.value = await db.attachments.toArray()
   const next: Record<string, string> = {}
@@ -151,14 +154,14 @@ async function handleRemove() {
 function openNew() {
   editing.value = null
   file.value = null
-  Object.assign(form, { title: '', area: ui.area, externalUrl: '' })
+  Object.assign(form, { title: '', listId: ui.currentListId, externalUrl: '' })
   open.value = true
 }
 
 function edit(row: Inspiration) {
   editing.value = row
   file.value = null
-  Object.assign(form, { title: row.title, area: row.area, externalUrl: row.externalUrl })
+  Object.assign(form, { title: row.title, listId: row.listId, externalUrl: row.externalUrl })
   open.value = true
 }
 
@@ -168,13 +171,14 @@ async function save() {
   const id = editing.value?.id ?? newId()
   const rec: Inspiration = {
     id,
-    area: form.area,
+    area: editing.value?.area ?? null,
+    listId: form.listId,
     itemId: null,
     categoryId: editing.value?.categoryId ?? null,
     title: form.title,
     notes: editing.value?.notes ?? '',
     externalUrl: form.externalUrl,
-    orderScope: inspirationScope(form.area),
+    orderScope: inspirationScope(form.listId),
     position: editing.value?.position ?? positionAfter(visible.value.at(-1)?.position),
     createdAt: editing.value?.createdAt ?? nowIso(),
     updatedAt: nowIso(),

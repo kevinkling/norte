@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="toolbar">
+    <div v-if="index >= 0" class="toolbar">
       <button class="btn" type="button" :disabled="index <= 0" @click="$emit('move', -1)">Subir</button>
       <button class="btn" type="button" :disabled="index < 0 || index >= total - 1" @click="$emit('move', 1)">Bajar</button>
     </div>

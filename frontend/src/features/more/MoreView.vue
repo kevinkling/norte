@@ -5,6 +5,22 @@
     </header>
 
     <div class="row-list neu">
+      <RouterLink to="/tareas" class="row-link">
+        <div class="row-content">
+          <span class="row-title">Todas las tareas</span>
+          <span class="row-desc">Lo pendiente de todas las listas, por fecha</span>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+      </RouterLink>
+
+      <RouterLink to="/inspiracion" class="row-link">
+        <div class="row-content">
+          <span class="row-title">Ideas e inspiración</span>
+          <span class="row-desc">Links sueltos que no son para comprar</span>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+      </RouterLink>
+
       <RouterLink to="/compras" class="row-link">
         <div class="row-content">
           <span class="row-title">Historial de compras</span>

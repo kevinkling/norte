@@ -15,6 +15,7 @@ export async function applyRemoteChanges(
   await db.transaction(
     'rw',
     [
+      db.lists,
       db.categories,
       db.tags,
       db.itemTags,

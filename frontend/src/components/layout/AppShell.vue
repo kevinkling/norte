@@ -1,6 +1,6 @@
 <template>
   <a class="skip-link" href="#main">Saltar al contenido</a>
-  
+
   <!-- Sidebar para Desktop / Web -->
   <aside class="sidebar neu" aria-label="Navegación principal">
     <div class="sidebar-brand">
@@ -14,50 +14,31 @@
       <p class="sub">bitácora personal</p>
     </div>
 
-    <div class="sidebar-section">
-      <span class="section-title">Mundo</span>
-      <div class="seg" role="group" aria-label="Área">
-        <button type="button" :class="{ 'is-on': ui.area === 'casa' }" @click="changeArea('casa')">Casa</button>
-        <button type="button" :class="{ 'is-on': ui.area === 'auto' }" @click="changeArea('auto')">Auto</button>
-      </div>
-    </div>
-
     <nav class="sidebar-nav" aria-label="Secciones">
-      <RouterLink :to="`/${ui.area}`" class="sidebar-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M4 8h16M4 12h16M4 16h10"/>
-        </svg>
-        <span>Ítems</span>
+      <RouterLink to="/comprar" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span>Para comprar</span>
+      </RouterLink>
+      <RouterLink to="/bandeja" class="sidebar-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        <span>Bandeja</span>
+        <span v-if="inboxCount" class="count-pill">{{ inboxCount }}</span>
       </RouterLink>
 
-      <RouterLink to="/tareas" class="sidebar-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M5 13l4 4L19 7"/>
-        </svg>
-        <span>Tareas</span>
+      <span class="section-title">Listas</span>
+      <RouterLink v-for="l in lists" :key="l.id" :to="`/l/${l.id}`" class="sidebar-item list-link">
+        <span class="emoji" aria-hidden="true">{{ l.emoji || '•' }}</span>
+        <span>{{ l.name }}</span>
       </RouterLink>
+      <button class="sidebar-item new-list-btn" type="button" @click="pickerOpen = true">+ Nueva lista</button>
 
-      <RouterLink to="/inspiracion" class="sidebar-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M7 4h10v16l-5-3-5 3z"/>
-        </svg>
-        <span>Ideas</span>
-      </RouterLink>
-
+      <span class="section-title">Más</span>
       <RouterLink to="/presupuesto" class="sidebar-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <circle cx="12" cy="12" r="8"/>
-          <path d="M12 8v8M9.5 10.5c.6-1 4.4-1 5 1s-1.6 2-2.5 2.2"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5c.6-1 4.4-1 5 1s-1.6 2-2.5 2.2"/></svg>
         <span>Presupuesto</span>
       </RouterLink>
-
       <RouterLink to="/mas" class="sidebar-item" :class="{ 'has-badge': sync.conflicts > 0 }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <circle cx="6" cy="12" r="1.3"/>
-          <circle cx="12" cy="12" r="1.3"/>
-          <circle cx="18" cy="12" r="1.3"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>
         <span>Más opciones</span>
         <span v-if="sync.conflicts > 0" class="badge-dot"></span>
       </RouterLink>
@@ -80,16 +61,14 @@
 
   <!-- Header para Mobile -->
   <header class="top neu">
-    <div class="brand">
-      <div class="mark">
-        <svg class="needle" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 3 L15 13 H9 Z" fill="currentColor"/>
-          <path d="M12 21 L9 11 H15 Z" fill="currentColor" opacity=".28"/>
-        </svg>
-        <h1>Norte</h1>
-      </div>
-      <p class="sub">bitácora personal</p>
-    </div>
+    <button class="list-switch" type="button" aria-label="Cambiar de lista" @click="pickerOpen = true">
+      <svg class="needle" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3 L15 13 H9 Z" fill="currentColor"/>
+        <path d="M12 21 L9 11 H15 Z" fill="currentColor" opacity=".28"/>
+      </svg>
+      <span class="list-name">{{ currentLabel }}</span>
+      <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
 
     <div class="actions">
       <SyncButton />
@@ -102,11 +81,6 @@
           <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
         </svg>
       </button>
-
-      <div class="seg" role="group" aria-label="Área">
-        <button type="button" :class="{ 'is-on': ui.area === 'casa' }" @click="changeArea('casa')">Casa</button>
-        <button type="button" :class="{ 'is-on': ui.area === 'auto' }" @click="changeArea('auto')">Auto</button>
-      </div>
     </div>
   </header>
 
@@ -116,63 +90,69 @@
 
   <!-- Navigation Bar para Mobile -->
   <nav class="bottom neu" aria-label="Secciones">
-    <RouterLink :to="`/${ui.area}`" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M4 8h16M4 12h16M4 16h10"/>
-      </svg>
-      <span>Ítems</span>
+    <RouterLink :to="`/l/${ui.currentListId}`" class="nav-item" :class="{ 'router-link-active': route.path.startsWith('/l/') }">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8h16M4 12h16M4 16h10"/></svg>
+      <span>Lista</span>
     </RouterLink>
-
-    <RouterLink to="/tareas" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M5 13l4 4L19 7"/>
-      </svg>
-      <span>Tareas</span>
+    <RouterLink to="/comprar" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span>Comprar</span>
     </RouterLink>
-
-    <RouterLink to="/inspiracion" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M7 4h10v16l-5-3-5 3z"/>
-      </svg>
-      <span>Ideas</span>
+    <RouterLink to="/bandeja" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      <span>Bandeja</span>
+      <span v-if="inboxCount" class="badge-num">{{ inboxCount }}</span>
     </RouterLink>
-
     <RouterLink to="/presupuesto" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="12" cy="12" r="8"/>
-        <path d="M12 8v8M9.5 10.5c.6-1 4.4-1 5 1s-1.6 2-2.5 2.2"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5c.6-1 4.4-1 5 1s-1.6 2-2.5 2.2"/></svg>
       <span>$</span>
     </RouterLink>
-
     <RouterLink to="/mas" class="nav-item" :class="{ 'has-badge': sync.conflicts > 0 }">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="6" cy="12" r="1.3"/>
-        <circle cx="12" cy="12" r="1.3"/>
-        <circle cx="18" cy="12" r="1.3"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg>
       <span>Más</span>
       <span v-if="sync.conflicts > 0" class="badge-dot"></span>
     </RouterLink>
   </nav>
+
+  <ListPicker :open="pickerOpen" :current="route.path.startsWith('/l/') ? ui.currentListId : undefined" @close="pickerOpen = false" @pick="goToList" />
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SyncButton from './SyncButton.vue'
+import ListPicker from '../ListPicker.vue'
 import { useSyncStore } from '../../stores/sync'
 import { useUiStore } from '../../stores/ui'
+import { listLabel } from '../../features/lists/actions'
+import { useNorteData } from '../../features/lists/useData'
 
 const sync = useSyncStore()
 const ui = useUiStore()
 const route = useRoute()
 const router = useRouter()
+const { lists, items } = useNorteData()
+const pickerOpen = ref(false)
 
-function changeArea(area: 'casa' | 'auto') {
-  ui.setArea(area)
-  if (route.path === '/casa' || route.path === '/auto') {
-    router.push(`/${area}`)
-  }
+const inboxCount = computed(() => items.value.filter((i) => i.listId === null && i.status !== 'comprado').length)
+
+const titles: Record<string, string> = {
+  '/comprar': 'Para comprar',
+  '/bandeja': 'Bandeja',
+  '/presupuesto': 'Presupuesto',
+  '/nuevo': 'Guardar link',
+}
+
+const currentLabel = computed(() => {
+  if (titles[route.path]) return titles[route.path]
+  const current = lists.value.find((l) => l.id === ui.currentListId)
+  if (route.path.startsWith('/l/') && current) return listLabel(current)
+  return 'Norte'
+})
+
+function goToList(id: string | null) {
+  pickerOpen.value = false
+  router.push(id ? `/l/${id}` : '/bandeja')
 }
 </script>
 
@@ -455,5 +435,67 @@ main {
     max-width: 1300px; /* Más espacio en pantallas grandes */
     margin: 0;
   }
+}
+.list-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  font: inherit;
+}
+.list-name {
+  font-family: var(--display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.caret { flex: none; color: var(--muted); }
+.needle { flex: none; }
+.badge-num {
+  position: absolute;
+  top: 4px;
+  right: 18%;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-on);
+  font-size: 0.68rem;
+  display: grid;
+  place-items: center;
+}
+.count-pill {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-on);
+  font-size: 0.75rem;
+  display: grid;
+  place-items: center;
+}
+.emoji { width: 20px; text-align: center; }
+.new-list-btn {
+  border: 1px dashed var(--border);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (min-width: 900px) {
+  .sidebar-nav { overflow-y: auto; }
+  .sidebar-nav .section-title { margin-top: 12px; padding-left: 16px; }
+  .sidebar-item.list-link, .new-list-btn { padding-top: 9px; padding-bottom: 9px; }
 }
 </style>

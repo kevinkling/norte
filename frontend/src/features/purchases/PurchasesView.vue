@@ -61,7 +61,7 @@ import AppCard from '../../components/ui/AppCard.vue'
 import AppModal from '../../components/ui/AppModal.vue'
 import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
-import { newId, nowIso } from '../../db/ids'
+import { itemScope, newId, nowIso } from '../../db/ids'
 import { mutateDomain } from '../../db/mutate'
 import { savePhoto } from '../../db/photos'
 import type { Item, Purchase } from '../../db/types'
@@ -113,7 +113,7 @@ async function save() {
   await mutateDomain({ entityType: 'purchase', entityId: id, operation: 'upsert', table: 'purchases', record: rec as unknown as Record<string, unknown> })
   const item = items.value.find((i) => i.id === form.itemId)
   if (item && item.status !== 'comprado') {
-    await mutateDomain({ entityType: 'item', entityId: item.id, operation: 'upsert', table: 'items', record: { ...item, status: 'comprado', orderScope: `items:${item.area}:comprado` } as unknown as Record<string, unknown> })
+    await mutateDomain({ entityType: 'item', entityId: item.id, operation: 'upsert', table: 'items', record: { ...item, status: 'comprado', orderScope: itemScope(item.listId, 'comprado') } as unknown as Record<string, unknown> })
   }
   for (const [i, file] of files.value.entries()) {
     await savePhoto({ file, role: i === 0 ? 'cover' : 'photo', purchaseId: id, position: (i + 1) * 1024 })
