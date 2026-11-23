@@ -17,7 +17,7 @@
         </label>
       </div>
       <label class="field"><span>Notas</span><textarea v-model="form.notes" placeholder="Detalles…"></textarea></label>
-      <button class="btn btn-primary submit-btn" type="submit">Guardar</button>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Guardar</button></div>
     </form>
   </AppModal>
 </template>
@@ -72,21 +72,3 @@ async function save() {
   emit('close')
 }
 </script>
-
-<style scoped>
-.form {
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
-}
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.submit-btn {
-  margin-top: 4px;
-  min-height: 48px;
-  font-size: 1.05rem;
-}
-</style>

@@ -1,81 +1,58 @@
 <template>
-  <section class="more-view">
-    <header class="head">
-      <h2>Más opciones</h2>
-    </header>
-
-    <div class="row-list neu">
-      <RouterLink to="/tareas" class="row-link">
-        <div class="row-content">
-          <span class="row-title">Todas las tareas</span>
-          <span class="row-desc">Lo pendiente de todas las listas, por fecha</span>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
-      </RouterLink>
-
-      <RouterLink to="/inspiracion" class="row-link">
-        <div class="row-content">
-          <span class="row-title">Ideas e inspiración</span>
-          <span class="row-desc">Links sueltos que no son para comprar</span>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
-      </RouterLink>
-
-      <RouterLink to="/compras" class="row-link">
-        <div class="row-content">
-          <span class="row-title">Historial de compras</span>
-          <span class="row-desc">Registro de gastos realizados</span>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
-      </RouterLink>
-
-      <RouterLink to="/organizar" class="row-link">
-        <div class="row-content">
-          <span class="row-title">Categorías y etiquetas</span>
-          <span class="row-desc">Organizar clasificaciones</span>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
-      </RouterLink>
-
-      <RouterLink to="/conflictos" class="row-link">
-        <div class="row-content">
-          <span class="row-title">Conflictos de sync</span>
-          <span class="row-desc" :class="{ 'warn': sync.conflicts > 0 }">
-            {{ sync.conflicts > 0 ? `${sync.conflicts} pendientes` : 'Sin conflictos' }}
-          </span>
-        </div>
-        <span v-if="sync.conflicts > 0" class="badge danger">{{ sync.conflicts }}</span>
-        <svg v-else class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+  <section class="page">
+    <div class="group">
+      <RouterLink v-for="l in links" :key="l.to" :to="l.to" class="list-row">
+        <span class="row-icon"><AppIcon :name="l.icon" :size="18" /></span>
+        <span class="row-main">
+          <span class="row-title">{{ l.title }}</span>
+          <span class="row-meta">{{ l.desc }}</span>
+        </span>
+        <AppIcon class="row-chevron" name="chevron-right" :size="16" />
       </RouterLink>
     </div>
 
-    <div class="sync-card neu">
-      <h3>Estado de sincronización</h3>
-      <div class="sync-status">
-        <span class="dot" :data-status="sync.status" aria-hidden="true"></span>
-        <span class="status-text">{{ statusLabel }}</span>
-      </div>
-      <p v-if="sync.pending > 0" class="pending-text">{{ sync.pending }} cambios pendientes de subir</p>
-      <p v-if="sync.lastSyncAt" class="sync-time">Última sincronización: {{ formatTime(sync.lastSyncAt) }}</p>
-      <p v-if="sync.paused" class="pending-text">Pausada: los cambios quedan solo en este dispositivo hasta que reanudes.</p>
-      <div class="sync-actions">
-        <button class="btn" type="button" :disabled="sync.status === 'syncing'" @click="onSync">
-          {{ sync.status === 'syncing' ? 'Sincronizando…' : 'Sincronizar ahora' }}
+    <div class="section">
+      <h2 class="sec-h">Sincronización</h2>
+      <div class="group">
+        <div class="list-row">
+          <span class="row-icon" :data-status="sync.paused ? 'paused' : sync.status"><AppIcon :name="statusIcon" :size="18" /></span>
+          <span class="row-main">
+            <span class="row-title">{{ statusLabel }}</span>
+            <span class="row-meta">
+              <span v-if="sync.pending > 0">{{ sync.pending }} {{ sync.pending === 1 ? 'cambio pendiente' : 'cambios pendientes' }} de subir</span>
+              <span v-else-if="sync.lastSyncAt">Última: {{ formatTime(sync.lastSyncAt) }}</span>
+              <span v-if="sync.paused">Los cambios quedan solo en este dispositivo</span>
+            </span>
+          </span>
+          <button class="btn btn-sm" type="button" :disabled="sync.status === 'syncing'" @click="onSync">
+            {{ sync.status === 'syncing' ? 'Sincronizando…' : 'Sincronizar' }}
+          </button>
+        </div>
+        <button class="list-row" type="button" @click="setSyncPaused(!sync.paused)">
+          <span class="row-icon"><AppIcon :name="sync.paused ? 'play' : 'pause'" :size="18" /></span>
+          <span class="row-main row-title">{{ sync.paused ? 'Reanudar sincronización' : 'Pausar sincronización' }}</span>
         </button>
-        <button class="btn" type="button" @click="setSyncPaused(!sync.paused)">
-          {{ sync.paused ? 'Reanudar sincronización' : 'Pausar sincronización' }}
-        </button>
+        <RouterLink to="/conflictos" class="list-row">
+          <span class="row-icon"><AppIcon name="alert" :size="18" /></span>
+          <span class="row-main">
+            <span class="row-title">Conflictos</span>
+            <span class="row-meta" :class="{ warn: sync.conflicts > 0 }">{{ sync.conflicts > 0 ? `${sync.conflicts} para resolver` : 'Ninguno' }}</span>
+          </span>
+          <span v-if="sync.conflicts > 0" class="badge is-danger">{{ sync.conflicts }}</span>
+          <AppIcon class="row-chevron" name="chevron-right" :size="16" />
+        </RouterLink>
         <button
           v-if="sync.pending > 0 || sync.conflicts > 0"
-          class="btn btn-danger"
+          class="list-row is-danger"
           type="button"
           :disabled="sync.status === 'syncing' || discarding"
           @click="onDiscard"
         >
-          {{ discarding ? 'Descartando…' : 'Descartar cambios locales' }}
+          <span class="row-icon"><AppIcon name="trash" :size="18" /></span>
+          <span class="row-main row-title">{{ discarding ? 'Descartando…' : 'Descartar cambios locales' }}</span>
         </button>
       </div>
-      <p v-if="discardError" class="pending-text">{{ discardError }}</p>
+      <p v-if="discardError" class="hint warn">{{ discardError }}</p>
     </div>
   </section>
 </template>
@@ -83,6 +60,7 @@
 <script setup lang="ts">
 import { askConfirm } from '../../app/confirm'
 import { computed, ref } from 'vue'
+import AppIcon, { type IconName } from '../../components/ui/AppIcon.vue'
 import { useSyncStore } from '../../stores/sync'
 import { discardLocalChanges, runSync, setSyncPaused } from '../../sync/runner'
 
@@ -108,12 +86,27 @@ async function onDiscard() {
   }
 }
 
+const links: { to: string; icon: IconName; title: string; desc: string }[] = [
+  { to: '/tareas', icon: 'check-square', title: 'Todas las tareas', desc: 'Lo pendiente de todas las listas, por fecha' },
+  { to: '/inspiracion', icon: 'bulb', title: 'Ideas e inspiración', desc: 'Links sueltos que no son para comprar' },
+  { to: '/compras', icon: 'receipt', title: 'Historial de compras', desc: 'Registro de gastos realizados' },
+  { to: '/organizar', icon: 'tag', title: 'Categorías y etiquetas', desc: 'Organizar clasificaciones' },
+]
+
+const statusIcon = computed<IconName>(() => {
+  if (sync.paused) return 'pause'
+  if (sync.status === 'syncing') return 'refresh'
+  if (sync.status === 'offline') return 'cloud-off'
+  if (sync.status === 'error') return 'alert-circle'
+  return sync.pending > 0 ? 'cloud-up' : 'cloud-check'
+})
+
 const statusLabel = computed(() => {
-  if (sync.paused) return 'Pausada (trabajando en local)'
-  if (sync.status === 'syncing') return 'Sincronizando...'
-  if (sync.status === 'offline') return 'Sin conexión (trabajando en local)'
+  if (sync.paused) return 'Sincronización en pausa'
+  if (sync.status === 'syncing') return 'Sincronizando…'
+  if (sync.status === 'offline') return 'Sin conexión'
   if (sync.status === 'error') return `Error: ${sync.lastError}`
-  return 'Sincronizado y al día'
+  return 'Sincronizado'
 })
 
 function formatTime(iso: string) {
@@ -127,118 +120,9 @@ function formatTime(iso: string) {
 </script>
 
 <style scoped>
-.more-view {
-  display: grid;
-  gap: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-@media (min-width: 768px) {
-  .more-view {
-    grid-template-columns: 1.2fr 1fr;
-    max-width: 900px;
-    align-items: start;
-    gap: 24px;
-  }
-  .head {
-    grid-column: 1 / -1;
-  }
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-.row-list {
-  display: grid;
-  background: var(--surface);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-.row-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  text-decoration: none;
-  color: var(--text);
-  border-bottom: 1px solid var(--border);
-  min-height: 64px;
-  transition: background 0.15s ease;
-}
-.row-link:last-child {
-  border-bottom: 0;
-}
-.row-link:active {
-  background: var(--inset);
-}
-.row-content {
-  display: grid;
-  gap: 4px;
-}
-.row-title {
-  font-weight: 600;
-  font-size: 1.05rem;
-}
-.row-desc {
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.chevron {
-  width: 20px;
-  height: 20px;
-  color: var(--muted);
-}
-.badge {
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.badge.danger {
-  background: var(--danger);
-  color: var(--accent-on);
-}
-.warn {
-  color: var(--danger) !important;
-  font-weight: 600;
-}
-
-.sync-card {
-  padding: 18px;
-  background: var(--surface);
-  border-radius: var(--radius);
-  display: grid;
-  gap: 12px;
-}
-.sync-card h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-.sync-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--ok);
-}
-.dot[data-status='offline'] { background: var(--muted); }
-.sync-actions { display: grid; gap: 8px; margin-top: 8px; }
-.dot[data-status='syncing'] { background: var(--accent); }
-.dot[data-status='error'] { background: var(--danger); }
-
-.status-text {
-  font-weight: 600;
-}
-.pending-text, .sync-time {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
+.row-icon[data-status='online'] { color: var(--ok); }
+.row-icon[data-status='syncing'] { color: var(--accent); }
+.row-icon[data-status='error'] { color: var(--danger); }
+.row-icon[data-status='offline'], .row-icon[data-status='paused'] { color: var(--muted); }
+.warn { color: var(--danger); font-weight: 600; }
 </style>

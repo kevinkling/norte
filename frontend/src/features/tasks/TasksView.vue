@@ -1,20 +1,19 @@
 <template>
-  <section class="tasks-view">
-    <header class="head">
-      <h2>Todas las tareas</h2>
+  <section class="page">
+    <div>
       <button class="chip" type="button" :aria-pressed="showDone" @click="showDone = !showDone">
         {{ showDone ? 'Ocultar completadas' : 'Ver completadas' }}
       </button>
-    </header>
+    </div>
 
-    <div class="rows">
+    <div v-if="visible.length" class="group">
       <TaskCard v-for="task in visible" :key="task.id" :task="task" :list-name="listName(task.listId)" @open="active = $event" @toggle="toggleTask" />
     </div>
 
-    <p v-if="loaded && !visible.length" class="empty-state muted">No hay tareas pendientes.</p>
+    <p v-if="loaded && !visible.length" class="empty-state">No hay tareas pendientes.</p>
 
     <button class="fab" type="button" aria-label="Nueva tarea" @click="formOpen = true">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      <AppIcon name="plus" :size="24" :stroke="2.2" />
     </button>
 
     <TaskSheet :task="active" @close="active = null" />
@@ -24,6 +23,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import TaskCard from '../../components/tasks/TaskCard.vue'
 import TaskSheet from '../../components/tasks/TaskSheet.vue'
 import TaskForm from './TaskForm.vue'
@@ -44,31 +44,3 @@ const visible = computed(() =>
     .sort((a, b) => (a.dueOn ?? '9999').localeCompare(b.dueOn ?? '9999') || a.position - b.position),
 )
 </script>
-
-<style scoped>
-.tasks-view {
-  display: grid;
-  gap: 16px;
-}
-.head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-.rows {
-  display: grid;
-  gap: 8px;
-}
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-}
-</style>

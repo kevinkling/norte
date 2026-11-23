@@ -1,82 +1,92 @@
 <template>
   <AppModal :open="open" :title="item ? 'Editar' : 'Nuevo para comprar'" @close="$emit('close')">
     <form class="form" @submit.prevent="save">
-      <div class="chips">
-        <select v-model="form.listId" class="chip-select" aria-label="Lista">
+      <div class="chip-row">
+        <select v-model="form.listId" class="chip" aria-label="Lista">
           <option :value="null">📥 Bandeja</option>
           <option v-for="l in lists" :key="l.id" :value="l.id">{{ listLabel(l) }}</option>
         </select>
-        <select v-model="form.categoryId" class="chip-select" aria-label="Categoría">
+        <select v-model="form.categoryId" class="chip" aria-label="Categoría">
           <option :value="null">Sin categoría</option>
           <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
         </select>
       </div>
       <label class="field"><span>Nombre</span><input v-model="form.name" required placeholder="Ej. Memoria RAM 16 GB" /></label>
-      <div class="tabs" role="tablist" aria-label="Secciones del ítem">
-        <button class="tab" type="button" role="tab" :aria-selected="tab === 'datos'" @click="tab = 'datos'">Datos</button>
-        <button class="tab" type="button" role="tab" :aria-selected="tab === 'links'" @click="tab = 'links'">
-          Links<span v-if="linkCount" class="tab-count">{{ linkCount }}</span>
+
+      <div class="segmented" role="tablist" aria-label="Secciones del ítem">
+        <button type="button" role="tab" :aria-selected="tab === 'datos'" @click="tab = 'datos'">Datos</button>
+        <button type="button" role="tab" :aria-selected="tab === 'links'" @click="tab = 'links'">
+          Links<span v-if="linkCount" class="badge">{{ linkCount }}</span>
         </button>
       </div>
 
       <div v-if="tab === 'links'" class="links-panel" role="tabpanel">
-        <div v-for="(link, i) in form.links" :key="i" class="link-card">
-          <div class="link-fields field">
-            <input v-model="link.url" type="url" inputmode="url" placeholder="https://… (Instagram, Mercado Libre…)" aria-label="URL" />
-            <input v-model="link.title" placeholder="Título (opcional)" aria-label="Título del link" />
+        <div v-for="(link, i) in form.links" :key="i" class="link-row">
+          <div class="link-fields">
+            <input v-model="link.url" class="input" type="url" inputmode="url" placeholder="https://… (Instagram, Mercado Libre…)" aria-label="URL" />
+            <input v-model="link.title" class="input" placeholder="Título (opcional)" aria-label="Título del link" />
           </div>
-          <button class="btn-danger-icon" type="button" aria-label="Quitar link" @click="form.links.splice(i, 1)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button class="icon-btn is-muted" type="button" aria-label="Quitar link" title="Quitar link" @click="form.links.splice(i, 1)">
+            <AppIcon name="x" :size="18" />
           </button>
         </div>
-        <button class="btn add-link-btn" type="button" @click="form.links.push({ id: '', title: '', url: '' })">+ Agregar link</button>
+        <div>
+          <button class="btn btn-sm btn-ghost add-link" type="button" @click="form.links.push({ id: '', title: '', url: '' })">
+            <AppIcon name="plus" :size="16" :stroke="2.2" />Agregar link
+          </button>
+        </div>
       </div>
 
       <template v-else>
-      <div class="grid-2">
-        <label class="field"><span>Precio estimado</span><input v-model="form.cost" inputmode="decimal" placeholder="Opcional" /></label>
-        <label class="field"><span>Mes objetivo</span><input v-model="form.targetMonth" type="month" /></label>
-      </div>
-      <label class="check-row"><input v-model="form.bought" type="checkbox" /> <span>Ya lo compré</span></label>
+        <div class="grid-2">
+          <label class="field"><span>Precio estimado</span><input v-model="form.cost" inputmode="decimal" placeholder="Opcional" /></label>
+          <label class="field"><span>Mes objetivo</span><input v-model="form.targetMonth" type="month" /></label>
+        </div>
+        <label class="check-row"><input v-model="form.bought" type="checkbox" /> <span>Ya lo compré</span></label>
 
-      <div class="extra">
-        <fieldset v-if="tags.length" class="field tags-fieldset">
+        <fieldset v-if="tags.length" class="field">
           <legend>Etiquetas</legend>
-          <div class="tags-grid">
-            <label v-for="t in tags" :key="t.id" class="check-row">
-              <input v-model="form.tagIds" type="checkbox" :value="t.id" />
-              <span>{{ t.name }}</span>
+          <div class="chip-row">
+            <label v-for="t in tags" :key="t.id" class="chip tag-chip" :class="{ 'is-on': form.tagIds.includes(t.id) }">
+              <input v-model="form.tagIds" class="sr-only" type="checkbox" :value="t.id" />{{ t.name }}
             </label>
           </div>
         </fieldset>
         <label class="field"><span>Notas</span><textarea v-model="form.description" placeholder="Modelo, medidas, dónde lo vi…"></textarea></label>
-        <div class="photo-field">
-          <span class="photo-title">Fotos</span>
-          <div class="photo-box">
-            <div v-if="gallery.length" class="photo-grid">
-              <figure v-for="(g, i) in gallery" :key="g.key" class="photo-item">
-                <img :src="g.url" alt="Foto del ítem" />
-                <button class="photo-remove" type="button" aria-label="Quitar foto" @click="removeThumb(i)">×</button>
-              </figure>
-            </div>
-            <p v-if="undownloaded" class="muted photo-hint">
-              {{ undownloaded }} {{ undownloaded === 1 ? 'foto todavía no se descargó' : 'fotos todavía no se descargaron' }} en este dispositivo.
-            </p>
-            <div class="photo-actions">
-              <label class="btn photo-btn">
-                Elegir archivos
-                <input class="sr-only" type="file" accept="image/*" multiple @change="onFile" />
-              </label>
-              <button class="btn photo-btn" type="button" @click="pasteFromClipboard">Pegar imagen</button>
-            </div>
-            <p class="muted photo-hint">{{ photoMsg || 'Podés agregar todas las que quieras. También podés pegar con Ctrl+V.' }}</p>
+
+        <div class="field">
+          <span>Fotos</span>
+          <div class="photo-grid">
+            <figure v-for="(g, i) in gallery" :key="g.key" class="photo">
+              <img :src="g.url" alt="Foto del ítem" />
+              <button class="photo-remove" type="button" aria-label="Quitar foto" @click="removeThumb(i)">
+                <AppIcon name="x" :size="14" :stroke="2.4" />
+              </button>
+            </figure>
+            <label class="photo-add" title="Elegir archivos">
+              <AppIcon name="upload" />
+              <span>Subir</span>
+              <input class="sr-only" type="file" accept="image/*" multiple @change="onFile" />
+            </label>
+            <button class="photo-add" type="button" title="Pegar imagen del portapapeles" @click="pasteFromClipboard">
+              <AppIcon name="clipboard" />
+              <span>Pegar</span>
+            </button>
           </div>
+          <p v-if="undownloaded" class="hint">
+            {{ undownloaded }} {{ undownloaded === 1 ? 'foto todavía no se descargó' : 'fotos todavía no se descargaron' }} en este dispositivo.
+          </p>
+          <p v-if="photoMsg" class="hint">{{ photoMsg }}</p>
         </div>
-      </div>
       </template>
 
-      <button class="btn btn-primary submit-btn" type="submit">Guardar</button>
-      <button v-if="item" class="btn btn-danger delete-btn" type="button" @click="deleteItem">Eliminar ítem</button>
+      <div class="form-actions">
+        <button v-if="item" class="btn btn-danger" type="button" @click="deleteItem">
+          <AppIcon name="trash" :size="18" />Eliminar
+        </button>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+      </div>
     </form>
   </AppModal>
 </template>
@@ -84,6 +94,7 @@
 <script setup lang="ts">
 import { askConfirm } from '../../app/confirm'
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import AppModal from '../../components/ui/AppModal.vue'
 import { db } from '../../db/norte.db'
 import { itemScope, newId, nowIso } from '../../db/ids'
@@ -291,179 +302,53 @@ async function save() {
 </script>
 
 <style scoped>
-.form {
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
-}
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.links-fieldset, .tags-fieldset {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
-}
+.segmented { justify-self: start; }
+.segmented .badge { margin-left: 2px; }
+.links-panel { display: grid; gap: var(--sp-3); }
 .link-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: center;
+  gap: var(--sp-1);
+  align-items: start;
 }
-.link-row input {
-  min-height: 40px;
-  min-width: 0;
+.link-fields { display: grid; gap: var(--sp-2); }
+.add-link { margin-left: calc(-1 * var(--sp-3)); color: var(--accent); }
+.tag-chip { display: inline-flex; align-items: center; cursor: pointer; }
+.tag-chip:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.photo-grid { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.photo { position: relative; margin: 0; }
+.photo img, .photo-add {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: var(--r-md);
+  object-fit: cover;
 }
-.btn-danger-icon {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--danger);
-  color: var(--danger);
-  border-radius: 10px;
+.photo-add {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  border: 1px dashed var(--border);
   background: transparent;
-  display: grid;
-  place-items: center;
-}
-.add-link-btn {
-  min-height: 40px;
-  font-size: 0.85rem;
-  border-style: dashed;
-  width: 100%;
-}
-.check-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  font-size: 0.95rem;
-}
-.check-row input {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--accent);
-}
-.tags-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 4px;
-}
-.extra {
-  display: grid;
-  gap: 12px;
-}
-/* Cápsula chica arriba de todo; el select nativo se mantiene (accesible y cómodo en móvil). */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.form .chip-select {
-  width: auto;
-  max-width: 100%;
-  height: 32px;
-  min-height: 0;
-  padding: 0 28px 0 12px;
-  border-radius: 999px;
-  font-size: 0.875rem;
+  color: var(--muted);
+  font-size: var(--fs-xs);
   font-weight: 600;
-  background-color: var(--surface-2, rgb(231, 224, 211));
   cursor: pointer;
 }
-.photo-field { display: grid; gap: 6px; }
-.photo-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.photo-box { display: grid; gap: 8px; }
-.photo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.photo-item { position: relative; margin: 0; }
-.photo-item img {
-  display: block;
-  height: 88px;
-  width: 88px;
-  object-fit: cover;
-  border-radius: 12px;
-}
+.photo-add:hover { border-color: var(--muted); color: var(--text); }
+.photo-add:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
 .photo-remove {
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 0;
+  display: grid;
+  place-items: center;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.photo-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.photo-btn { min-height: 36px; cursor: pointer; }
-.photo-hint { margin: 0; font-size: 0.8125rem; }
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  overflow: hidden;
-}
-.delete-btn {
-  min-height: 44px;
-  justify-content: center;
-}
-.tabs {
-  display: flex;
-  gap: 6px;
-  border-bottom: 1px solid var(--border);
-}
-.tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 0 14px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-.tab[aria-selected='true'] {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
-.tab-count {
-  min-width: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--inset);
-  font-size: 0.75rem;
-  line-height: 20px;
-  text-align: center;
-}
-.links-panel { display: grid; gap: 10px; }
-.link-card {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  align-items: start;
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-.link-fields { display: grid; gap: 8px; }
-.submit-btn {
-  margin-top: 4px;
-  min-height: 48px;
-  font-size: 1.05rem;
 }
 </style>

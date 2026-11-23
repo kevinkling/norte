@@ -43,12 +43,11 @@ function onUpdate(next: T[]) {
 <style scoped>
 /* Arrastrar no debe seleccionar el texto de las filas (resaltado azul). */
 .row {
-  margin-bottom: 8px;
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
 :deep(.keep-ghost) { opacity: 0.45; }
-:deep(.keep-chosen) { transform: scale(1.02); }
+:deep(.keep-chosen) { background: var(--inset); }
 </style>

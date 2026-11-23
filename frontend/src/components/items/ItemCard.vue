@@ -1,34 +1,28 @@
 <template>
-  <AppCard class="item-card" :class="{ done: item.status === 'comprado' }" @click="$emit('open', item)">
+  <div class="list-row is-link item-row" :class="{ done: item.status === 'comprado' }" @click="$emit('open', item)">
     <button
-      class="check no-drag"
+      class="row-check no-drag"
       type="button"
       :aria-pressed="item.status === 'comprado'"
       :aria-label="item.status === 'comprado' ? `Marcar ${item.name} como pendiente` : `Marcar ${item.name} como comprado`"
       @click.stop="$emit('toggle', item)"
     >
-      <svg v-if="item.status === 'comprado'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 13l4 4L19 7"/></svg>
-      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <AppIcon v-if="item.status === 'comprado'" name="check" :size="14" :stroke="3" />
     </button>
-    <img v-if="photo" :src="photo" :alt="''" class="thumb" />
-    <div class="info">
-      <strong class="name">{{ item.name }}</strong>
-      <p v-if="listName" class="meta">
-        <span class="muted">{{ listName }}</span>
-      </p>
-      <SourceLink v-if="item.referenceUrl" :url="item.referenceUrl" />
+    <img v-if="photo" :src="photo" alt="" class="thumb" />
+    <div class="row-main">
+      <span class="row-title">{{ item.name }}</span>
+      <span v-if="listName || item.referenceUrl" class="row-meta">
+        <span v-if="listName">{{ listName }}</span>
+        <SourceLink v-if="item.referenceUrl" :url="item.referenceUrl" />
+      </span>
     </div>
-    <span class="price" :class="{ empty: !item.estimatedCostMinor }" :aria-label="item.estimatedCostMinor ? undefined : 'Sin precio'">
-      {{ item.estimatedCostMinor ? pesos(item.estimatedCostMinor, item.currency) : '—' }}
-    </span>
-    <button class="more no-drag" type="button" aria-label="Acciones" @click.stop="$emit('open', item)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-    </button>
-  </AppCard>
+    <span v-if="item.estimatedCostMinor" class="row-end price">{{ pesos(item.estimatedCostMinor, item.currency) }}</span>
+  </div>
 </template>
 
 <script setup lang="ts">
-import AppCard from '../ui/AppCard.vue'
+import AppIcon from '../ui/AppIcon.vue'
 import SourceLink from './SourceLink.vue'
 import type { Item } from '../../db/types'
 import { pesos } from '../../utils/money'
@@ -38,87 +32,15 @@ defineEmits<{ open: [Item]; toggle: [Item] }>()
 </script>
 
 <style scoped>
-.item-card {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 10px 12px;
-  cursor: pointer;
-}
-.check {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1.5px solid var(--border);
-  background: var(--inset);
-  color: var(--muted);
-  display: grid;
-  place-items: center;
-}
-.check svg { width: 20px; height: 20px; }
-.check[aria-pressed='true'] {
-  background: var(--ok);
-  border-color: var(--ok);
-  color: var(--surface);
-}
 .thumb {
   flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 1px solid var(--border);
-}
-.info {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-  justify-items: start;
-}
-.name {
-  font-size: 1rem;
-  font-weight: 650;
-  overflow-wrap: anywhere;
-}
-.done .name {
-  text-decoration: line-through;
-  color: var(--muted);
-}
-.meta {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-/* Columna de precio: ancho mínimo fijo y alineada a la derecha para que las filas queden en grilla. */
-.price {
-  flex: none;
-  min-width: 5.5rem;
-  text-align: right;
-  font-weight: 700;
-  font-size: 0.95rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.price.empty {
-  font-weight: 400;
-  color: var(--muted);
-}
-.done .price { color: var(--muted); }
-.more {
-  flex: none;
   width: 40px;
   height: 40px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--inset);
 }
-.more svg { width: 20px; height: 20px; }
-.more:active { background: var(--inset); }
+.done .row-title { color: var(--muted); text-decoration: line-through; }
+.done .price { color: var(--muted); font-weight: 400; }
+.done .thumb { opacity: 0.6; }
 </style>

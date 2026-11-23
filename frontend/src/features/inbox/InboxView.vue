@@ -1,28 +1,34 @@
 <template>
-  <section class="inbox-view">
-    <header class="head">
-      <h2>Bandeja</h2>
-      <p class="muted lead">Lo que guardás desde Instagram, Pinterest o Mercado Libre cae acá. Después lo pasás a una lista.</p>
-    </header>
+  <section class="page">
+    <p class="lead">Lo que compartís desde Instagram, Pinterest o Mercado Libre cae acá. Después lo pasás a una lista.</p>
 
-    <div class="paste neu">
-      <button class="btn btn-primary paste-btn" type="button" :disabled="busy" @click="pasteFromClipboard">📋 Pegar link copiado</button>
-      <form class="manual" @submit.prevent="saveManual">
-        <input v-model="manual" type="url" inputmode="url" placeholder="…o escribilo acá: https://" aria-label="Link a guardar" />
-        <button class="btn" type="submit" :disabled="!manual.trim() || busy">Guardar</button>
-      </form>
-      <p v-if="message" class="msg" role="status">{{ message }}</p>
-    </div>
-
-    <div class="rows">
-      <div v-for="item in pending" :key="item.id" class="row">
-        <ItemCard :item="item" :photo="photos[item.id]" @open="active = $event" @toggle="setItemBought($event, true)" />
-        <button class="btn move-btn" type="button" @click="moving = item">Mover a una lista →</button>
+    <form class="capture" @submit.prevent="saveManual">
+      <div class="composer">
+        <button class="icon-btn is-muted lead-icon" type="button" :disabled="busy" aria-label="Pegar link copiado" title="Pegar link copiado" @click="pasteFromClipboard">
+          <AppIcon name="clipboard" :size="18" />
+        </button>
+        <input v-model="manual" type="url" inputmode="url" placeholder="Pegá o escribí un link" aria-label="Link a guardar" />
+        <button class="icon-btn is-fill" type="submit" :disabled="!manual.trim() || busy" aria-label="Guardar link">
+          <AppIcon name="arrow-up" :size="18" :stroke="2.2" />
+        </button>
       </div>
-      <TaskCard v-for="task in pendingTasks" :key="task.id" :task="task" @open="activeTask = $event" @toggle="toggleTask" />
+      <p v-if="message" class="hint" role="status">{{ message }}</p>
+    </form>
+
+    <div v-if="pending.length || pendingTasks.length" class="section">
+      <h2 class="sec-h">Sin ordenar <span class="count">{{ pending.length + pendingTasks.length }}</span></h2>
+      <div class="group">
+        <div v-for="item in pending" :key="item.id" class="with-action">
+          <ItemCard :item="item" :photo="photos[item.id]" @open="active = $event" @toggle="setItemBought($event, true)" />
+          <button class="icon-btn move-btn" type="button" aria-label="Mover a una lista" title="Mover a una lista" @click="moving = item">
+            <AppIcon name="move" />
+          </button>
+        </div>
+        <TaskCard v-for="task in pendingTasks" :key="task.id" :task="task" @open="activeTask = $event" @toggle="toggleTask" />
+      </div>
     </div>
 
-    <p v-if="loaded && !pending.length && !pendingTasks.length" class="empty-state muted">
+    <p v-if="loaded && !pending.length && !pendingTasks.length" class="empty-state">
       La bandeja está vacía. Compartí un link desde el iPhone con el Atajo “Guardar en Norte” o pegalo arriba.
     </p>
 
@@ -34,6 +40,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import ItemCard from '../../components/items/ItemCard.vue'
 import ItemSheet from '../../components/items/ItemSheet.vue'
 import TaskCard from '../../components/tasks/TaskCard.vue'
@@ -96,66 +103,15 @@ async function moveTo(listId: string | null) {
 </script>
 
 <style scoped>
-.inbox-view {
-  display: grid;
-  gap: 18px;
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-.lead {
-  margin: 6px 0 0;
-  font-size: 0.92rem;
-}
-.paste {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-.paste-btn {
-  min-height: 48px;
-  width: 100%;
-  justify-content: center;
-  font-size: 1rem;
-}
-.manual {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-.manual input {
-  min-height: 44px;
-  min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text);
-  padding: 0 12px;
-  font: inherit;
-}
-.msg {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-.rows {
-  display: grid;
-  gap: 12px;
-}
-.row {
-  display: grid;
-  gap: 6px;
-}
+.capture { display: grid; gap: var(--sp-2); }
+/* La fila del ítem deja lugar a la derecha para el botón Mover. */
+.with-action { position: relative; }
+.with-action :deep(.list-row) { padding-right: 52px; }
 .move-btn {
-  min-height: 38px;
-  font-size: 0.85rem;
-  justify-self: end;
-}
-.empty-state {
-  text-align: center;
-  padding: 32px 16px;
+  position: absolute;
+  right: var(--sp-2);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
 }
 </style>

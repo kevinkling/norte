@@ -6,19 +6,10 @@ import { router } from './app/router'
 import { useUiStore } from './stores/ui'
 import { listenConnectivity, runSync } from './sync/runner'
 
-// Fuentes Brújula + Bitácora
-import '@fontsource/fraunces/400.css'
-import '@fontsource/fraunces/400-italic.css'
-import '@fontsource/fraunces/500.css'
-import '@fontsource/fraunces/500-italic.css'
-import '@fontsource/fraunces/600.css'
-import '@fontsource/fraunces/600-italic.css'
-import '@fontsource/fraunces/700.css'
-import '@fontsource/fraunces/700-italic.css'
-import '@fontsource/figtree/400.css'
-import '@fontsource/figtree/500.css'
-import '@fontsource/figtree/600.css'
-import '@fontsource/figtree/700.css'
+// Fuentes Musgo: DM Sans (UI) + Newsreader (títulos). Ver DESIGN.md
+import '@fontsource-variable/dm-sans'
+import '@fontsource/newsreader/500.css'
+import '@fontsource/newsreader/600.css'
 
 import './styles/main.css'
 

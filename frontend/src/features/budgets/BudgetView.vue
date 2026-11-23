@@ -1,76 +1,54 @@
 <template>
-  <section class="budget-view">
-    <header class="head">
-      <h2>Presupuesto</h2>
-    </header>
-
-    <!-- Héroe del presupuesto -->
-    <div class="budget-hero neu" :class="{ 'over-budget': remaining < 0 }">
+  <section class="page budget">
+    <div class="hero card" :class="{ over: remaining < 0 }">
       <span class="hero-label">Restante este mes</span>
-      <h1 class="hero-amount">{{ pesos(remaining) }}</h1>
-      
-      <div class="progress-container">
-        <div class="progress-bar" :style="{ width: `${progress}%` }" :class="{ 'danger': remaining < 0 }"></div>
+      <strong class="hero-amount">{{ pesos(remaining) }}</strong>
+      <div class="bar" role="progressbar" :aria-valuenow="Math.round(progress)" aria-valuemin="0" aria-valuemax="100" aria-label="Gastado del mes">
+        <div class="bar-fill" :style="{ width: `${progress}%` }"></div>
       </div>
-
-      <div class="budget-summary">
-        <div class="summary-item">
-          <span class="summary-label">Disponible</span>
-          <span class="summary-value">{{ pesos(available) }}</span>
-        </div>
-        <div class="summary-divider"></div>
-        <div class="summary-item">
-          <span class="summary-label">Gastado</span>
-          <span class="summary-value">{{ pesos(spent) }}</span>
-        </div>
+      <div class="hero-split">
+        <div><span class="hero-label">Disponible</span><span class="hero-num">{{ pesos(available) }}</span></div>
+        <div><span class="hero-label">Gastado</span><span class="hero-num">{{ pesos(spent) }}</span></div>
       </div>
     </div>
 
-    <!-- Sugerencias para este mes -->
-    <div class="suggestions-section">
-      <h3>Sugerencias de compra</h3>
-      <p v-if="!combos.length" class="muted empty-suggestions">
+    <div class="section suggestions">
+      <h2 class="sec-h">Sugerencias de compra</h2>
+      <p v-if="!combos.length" class="hint">
         No hay combinaciones que entren en el presupuesto con ítems deseados o planificados.
       </p>
-      
-      <div v-else class="combos-list">
-        <AppCard v-for="(combo, i) in combos" :key="i" class="combo-card">
-          <div class="combo-header">
-            <strong>Opción {{ i + 1 }} {{ combo.approximate ? '(aproximada)' : '' }}</strong>
-            <span class="combo-total">{{ pesos(combo.totalMinor) }}</span>
-          </div>
-          <ul class="combo-items">
-            <li v-for="item in combo.items" :key="item.id" class="combo-item">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-cost">{{ pesos(item.estimatedCostMinor) }}</span>
-            </li>
-          </ul>
-        </AppCard>
+      <div v-for="(combo, i) in combos" v-else :key="i" class="group">
+        <div class="list-row combo-head">
+          <span class="row-main row-title">Opción {{ i + 1 }}<span v-if="combo.approximate" class="muted"> · aproximada</span></span>
+          <span class="row-end">{{ pesos(combo.totalMinor) }}</span>
+        </div>
+        <div v-for="item in combo.items" :key="item.id" class="list-row combo-item">
+          <span class="row-main">{{ item.name }}</span>
+          <span class="row-end muted">{{ pesos(item.estimatedCostMinor) }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- Ajustes de Presupuesto (Sección secundaria al final) -->
-    <div class="budget-settings neu">
-      <details>
-        <summary class="settings-summary">
-          <span>Ajustar presupuesto mensual</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
-        </summary>
-        <form class="form" @submit.prevent="saveBudget">
-          <div class="grid-2">
-            <label class="field"><span>Mes</span><input v-model="period" type="month" required /></label>
-            <label class="field"><span>Monto disponible</span><input v-model="amount" inputmode="decimal" required placeholder="0" /></label>
-          </div>
-          <button class="btn btn-primary submit-btn" type="submit">Guardar cambios</button>
-        </form>
-      </details>
-    </div>
+    <details class="group settings">
+      <summary class="list-row">
+        <span class="row-icon"><AppIcon name="pencil" :size="18" /></span>
+        <span class="row-main row-title">Ajustar presupuesto mensual</span>
+        <AppIcon class="row-chevron caret" name="chevron-down" :size="16" />
+      </summary>
+      <form class="form settings-form" @submit.prevent="saveBudget">
+        <div class="grid-2">
+          <label class="field"><span>Mes</span><input v-model="period" type="month" required /></label>
+          <label class="field"><span>Monto disponible</span><input v-model="amount" inputmode="decimal" required placeholder="0" /></label>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" type="submit">Guardar</button></div>
+      </form>
+    </details>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import AppCard from '../../components/ui/AppCard.vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
 import { currentMonth, newId, nowIso } from '../../db/ids'
@@ -120,204 +98,46 @@ async function saveBudget() {
 </script>
 
 <style scoped>
-.budget-view {
+.hero {
   display: grid;
-  gap: 20px;
-}
-@media (min-width: 768px) {
-  .budget-view {
-    grid-template-columns: 1.2fr 1fr;
-    align-items: start;
-    gap: 24px;
-  }
-  .head {
-    grid-column: 1 / -1;
-  }
-  .budget-hero {
-    position: sticky;
-    top: 40px;
-    grid-column: 1;
-    grid-row: 2 / 4;
-  }
-  .suggestions-section {
-    grid-column: 2;
-  }
-  .budget-settings {
-    grid-column: 2;
-  }
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.budget-hero {
-  padding: 24px 20px;
-  background: var(--surface);
-  border-radius: var(--radius);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-5) var(--sp-4) var(--sp-4);
   text-align: center;
-  position: relative;
-}
-.budget-hero.over-budget {
-  border-color: var(--danger);
 }
 .hero-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--muted);
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 .hero-amount {
   font-family: var(--display);
-  font-size: 2.8rem;
-  font-weight: 700;
-  font-style: italic;
-  margin: 8px 0 16px;
+  font-size: var(--fs-2xl);
+  font-weight: 600;
   line-height: 1;
-  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
-.budget-hero.over-budget .hero-amount {
-  color: var(--danger);
-}
-
-.progress-container {
-  width: 100%;
-  height: 8px;
-  background: var(--inset);
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  border: 1px solid var(--border);
-}
-.progress-bar {
-  height: 100%;
-  background: var(--ok);
-  border-radius: 999px;
-  transition: width 0.3s ease;
-}
-.progress-bar.danger {
-  background: var(--danger);
-}
-
-.budget-summary {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-  align-items: center;
-}
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.summary-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-.summary-value {
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-.summary-divider {
-  width: 1px;
-  height: 24px;
-  background: var(--border);
-}
-
-.suggestions-section h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0 0 12px;
-}
-.empty-suggestions {
-  font-size: 0.95rem;
-}
-.combos-list {
-  display: grid;
-  gap: 12px;
-}
-.combo-card {
-  padding: 14px 16px;
-}
-.combo-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1.05rem;
-  margin-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 8px;
-}
-.combo-total {
-  font-weight: 700;
-  color: var(--accent);
-}
-.combo-items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 6px;
-}
-.combo-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-}
-.combo-item .item-name {
-  color: var(--text);
-}
-.combo-item .item-cost {
-  color: var(--muted);
-  font-weight: 600;
-}
-
-/* Ajustes de presupuesto */
-.budget-settings {
-  background: var(--surface);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-.settings-summary {
-  padding: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  list-style: none;
-}
-.settings-summary::-webkit-details-marker {
-  display: none;
-}
-.settings-summary .chevron {
-  width: 20px;
-  height: 20px;
-  color: var(--muted);
-  transition: transform 0.2s ease;
-}
-details[open] .settings-summary .chevron {
-  transform: rotate(180deg);
-}
-.form {
-  padding: 0 16px 16px;
-  display: grid;
-  gap: 12px;
-}
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.submit-btn {
-  min-height: 44px;
+.over .hero-amount { color: var(--danger); }
+.bar { height: 6px; border-radius: var(--r-pill); background: var(--inset); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: inherit; background: var(--accent); transition: width 0.3s ease; }
+.over .bar-fill { background: var(--danger); }
+.hero-split { display: grid; grid-template-columns: 1fr 1fr; }
+.hero-split > div + div { border-left: 1px solid var(--border); }
+.hero-num { font-weight: 600; font-variant-numeric: tabular-nums; }
+.suggestions .group + .group { margin-top: var(--sp-2); }
+.combo-head { min-height: 44px; background: color-mix(in srgb, var(--inset) 40%, var(--surface)); }
+.combo-head .row-end { color: var(--accent); }
+.combo-item { min-height: 40px; font-size: var(--fs-sm); }
+.combo-item .row-end { font-weight: 500; }
+.settings summary { list-style: none; cursor: pointer; margin-top: -1px; }
+.settings summary::-webkit-details-marker { display: none; }
+.settings .caret { transition: transform var(--ease); }
+.settings[open] .caret { transform: rotate(180deg); }
+.settings-form { padding: var(--sp-2) var(--sp-3) var(--sp-3); }
+@media (min-width: 900px) {
+  .budget { grid-template-columns: 1fr 1fr; align-items: start; }
+  .hero { grid-row: span 2; }
 }
 </style>

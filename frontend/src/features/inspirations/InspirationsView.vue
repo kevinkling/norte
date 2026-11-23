@@ -1,62 +1,47 @@
 <template>
-  <section class="inspirations-view">
-    <header class="head">
-      <h2>Ideas e inspiración</h2>
-    </header>
-
-    <div class="grid-2">
-      <div v-for="(element, i) in visible" :key="element.id" class="pin" @click="openActions(element)">
-        <div class="pin-visual">
+  <section class="page">
+    <div v-if="visible.length" class="pins">
+      <button v-for="element in visible" :key="element.id" class="pin" type="button" @click="openActions(element)">
+        <span class="pin-visual">
           <img v-if="cover(element.id)" :src="cover(element.id)" :alt="element.title || 'Captura de inspiración'" class="shot" />
-          <div v-else class="shot-placeholder" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          </div>
-        </div>
-        <div class="pin-caption">
-          <strong>{{ element.title || element.externalUrl }}</strong>
-          <span class="muted">{{ getDomain(element.externalUrl) }}</span>
-        </div>
-        <button class="icon-btn action-trigger no-drag" type="button" aria-label="Acciones" @click.stop="openActions(element)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-        </button>
-      </div>
+          <AppIcon v-else name="image" :size="22" />
+        </span>
+        <span class="pin-caption">
+          <span class="pin-title">{{ element.title || element.externalUrl }}</span>
+          <span class="pin-domain">{{ getDomain(element.externalUrl) }}</span>
+        </span>
+      </button>
     </div>
 
-    <p v-if="!visible.length" class="empty-state muted">
-      No hay enlaces guardados.
-    </p>
+    <p v-else class="empty-state">No hay enlaces guardados.</p>
 
-    <!-- FAB Nuevo enlace -->
     <button class="fab" type="button" aria-label="Nuevo enlace" @click="openNew">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      <AppIcon name="plus" :size="24" :stroke="2.2" />
     </button>
 
-    <!-- Hoja de acciones para Inspiración -->
-    <AppModal :open="actionsOpen" :title="activeInspiration?.title || 'Acciones'" @close="actionsOpen = false">
-      <div class="actions-sheet">
-        <p class="sheet-meta muted">
-          {{ activeInspiration?.externalUrl }}
-        </p>
-        <div class="sheet-buttons">
-          <a :href="activeInspiration?.externalUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary sheet-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Abrir enlace
+    <AppModal :open="actionsOpen" :title="activeInspiration?.title || 'Enlace'" @close="actionsOpen = false">
+      <div class="sheet">
+        <p class="sheet-meta">{{ activeInspiration?.externalUrl }}</p>
+        <div class="group">
+          <a :href="activeInspiration?.externalUrl" target="_blank" rel="noopener noreferrer" class="list-row">
+            <span class="row-icon"><AppIcon name="external" :size="18" /></span>
+            <span class="row-main row-title">Abrir enlace</span>
           </a>
-          <button class="btn sheet-btn" type="button" @click="handleEdit">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Editar enlace
+          <button class="list-row" type="button" @click="handleEdit">
+            <span class="row-icon"><AppIcon name="pencil" :size="18" /></span>
+            <span class="row-main row-title">Editar</span>
           </button>
-          <button class="btn btn-danger sheet-btn" type="button" @click="handleRemove">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-            Archivar enlace
+          <button class="list-row is-danger" type="button" @click="handleRemove">
+            <span class="row-icon"><AppIcon name="archive" :size="18" /></span>
+            <span class="row-main row-title">Archivar</span>
           </button>
         </div>
       </div>
     </AppModal>
 
-    <!-- Modal de Formulario (Alta/Edición) -->
     <AppModal :open="open" :title="editing ? 'Editar enlace' : 'Nuevo enlace'" @close="open = false">
       <form class="form" @submit.prevent="save">
+        <label class="field"><span>URL</span><input v-model="form.externalUrl" type="url" required placeholder="https://…" /></label>
         <label class="field"><span>Título (opcional)</span><input v-model="form.title" placeholder="Ej. Alzada de cocina" /></label>
         <label class="field"><span>Lista</span>
           <select v-model="form.listId">
@@ -64,13 +49,8 @@
             <option v-for="l in lists" :key="l.id" :value="l.id">{{ listLabel(l) }}</option>
           </select>
         </label>
-        <label class="field"><span>URL</span><input v-model="form.externalUrl" type="url" required placeholder="https://…" /></label>
-        <label class="field file-field">
-          <span>Captura (opcional)</span>
-          <input type="file" accept="image/*" @change="onFile" />
-        </label>
-        <p class="muted form-tip">Podés guardar solo el link. La captura queda a mano si querés una foto.</p>
-        <button class="btn btn-primary submit-btn" type="submit">Guardar</button>
+        <label class="field"><span>Captura (opcional)</span><input type="file" accept="image/*" @change="onFile" /></label>
+        <div class="form-actions"><button class="btn btn-primary" type="submit">Guardar</button></div>
       </form>
     </AppModal>
   </section>
@@ -79,9 +59,8 @@
 <script setup lang="ts">
 import { askConfirm } from '../../app/confirm'
 import { computed, reactive, ref, watch } from 'vue'
-import AppCard from '../../components/ui/AppCard.vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import AppModal from '../../components/ui/AppModal.vue'
-import SortableList from '../../components/SortableList.vue'
 import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
 import { inspirationScope, newId, nowIso } from '../../db/ids'
@@ -224,142 +203,37 @@ async function nudge(delta: number) {
 </script>
 
 <style scoped>
-.inspirations-view {
-  display: grid;
-  gap: 16px;
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.grid-2 {
+.pins {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: var(--sp-3);
 }
-@media (min-width: 768px) {
-  .grid-2 {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-}
-@media (min-width: 1100px) {
-  .grid-2 {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+@media (min-width: 600px) { .pins { grid-template-columns: repeat(3, 1fr); } }
 .pin {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-.pin:active {
-  transform: scale(0.98);
-}
-.pin-visual {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  background: var(--inset);
-  border-bottom: 1px solid var(--border);
+  padding: 0;
   overflow: hidden;
+  text-align: left;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  transition: border-color var(--ease);
 }
-.shot {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.shot-placeholder {
-  width: 100%;
-  height: 100%;
+@media (hover: hover) { .pin:hover { border-color: color-mix(in srgb, var(--muted) 50%, var(--border)); } }
+.pin-visual {
+  aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
+  background: var(--inset);
   color: var(--muted);
-}
-.shot-placeholder svg {
-  width: 24px;
-  height: 24px;
-}
-.pin-caption {
-  padding: 10px 12px 12px;
-  display: grid;
-  gap: 2px;
-}
-.pin-caption strong {
-  font-size: 0.9rem;
-  font-weight: 650;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
-.pin-caption span {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-.action-trigger {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(4px);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-}
-:root[data-theme='dark'] .action-trigger {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  font-size: 0.95rem;
-}
-
-/* Hoja de acciones */
-.actions-sheet {
-  display: grid;
-  gap: 16px;
-  padding: 8px 0;
-}
-.sheet-meta {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  word-break: break-all;
-}
-.sheet-buttons {
-  display: grid;
-  gap: 10px;
-}
-.sheet-btn {
-  width: 100%;
-  justify-content: center;
-  font-size: 1rem;
-}
-
-/* Formulario */
-.form {
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
-}
-.form-tip {
-  font-size: 0.85rem;
-  margin: 0;
-}
-.submit-btn {
-  margin-top: 8px;
-  min-height: 48px;
-  font-size: 1.05rem;
-}
+.shot { width: 100%; height: 100%; object-fit: cover; }
+.pin-caption { display: grid; gap: 2px; padding: var(--sp-2) var(--sp-3) var(--sp-3); min-width: 0; }
+.pin-title { font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pin-domain { font-size: var(--fs-xs); color: var(--muted); }
+.sheet { display: grid; gap: var(--sp-3); }
+.sheet-meta { margin: calc(-1 * var(--sp-2)) 0 0; font-size: var(--fs-sm); color: var(--muted); word-break: break-all; }
 </style>

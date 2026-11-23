@@ -1,14 +1,29 @@
 <template>
   <AppModal :open="Boolean(item) && mode === 'menu'" :title="item?.name || 'Acciones'" @close="$emit('close')">
     <div v-if="item" class="sheet">
-      <p v-if="item.estimatedCostMinor" class="muted meta">{{ pesos(item.estimatedCostMinor, item.currency) }}</p>
-      <a v-if="item.referenceUrl" class="btn btn-primary sheet-btn" :href="item.referenceUrl" target="_blank" rel="noopener noreferrer">
-        Abrir en {{ describeLink(item.referenceUrl).label }}
-      </a>
-      <button class="btn sheet-btn" type="button" @click="mode = 'edit'">Editar</button>
-      <button class="btn sheet-btn" type="button" @click="mode = 'move'">Mover a otra lista</button>
-      <button v-if="item.status !== 'comprado'" class="btn sheet-btn" type="button" @click="registerPurchase">Registrar compra con precio</button>
-      <button class="btn btn-danger sheet-btn" type="button" @click="archive">Eliminar</button>
+      <p v-if="item.estimatedCostMinor" class="sheet-meta">{{ pesos(item.estimatedCostMinor, item.currency) }}</p>
+      <div class="group">
+        <a v-if="item.referenceUrl" class="list-row" :href="item.referenceUrl" target="_blank" rel="noopener noreferrer">
+          <span class="row-icon"><AppIcon name="external" :size="18" /></span>
+          <span class="row-main row-title">Abrir en {{ describeLink(item.referenceUrl).label }}</span>
+        </a>
+        <button class="list-row" type="button" @click="mode = 'edit'">
+          <span class="row-icon"><AppIcon name="pencil" :size="18" /></span>
+          <span class="row-main row-title">Editar</span>
+        </button>
+        <button class="list-row" type="button" @click="mode = 'move'">
+          <span class="row-icon"><AppIcon name="move" :size="18" /></span>
+          <span class="row-main row-title">Mover a otra lista</span>
+        </button>
+        <button v-if="item.status !== 'comprado'" class="list-row" type="button" @click="registerPurchase">
+          <span class="row-icon"><AppIcon name="receipt" :size="18" /></span>
+          <span class="row-main row-title">Registrar compra con precio</span>
+        </button>
+        <button class="list-row is-danger" type="button" @click="archive">
+          <span class="row-icon"><AppIcon name="trash" :size="18" /></span>
+          <span class="row-main row-title">Eliminar</span>
+        </button>
+      </div>
     </div>
   </AppModal>
 
@@ -28,6 +43,7 @@
 import { askConfirm } from '../../app/confirm'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import AppIcon from '../ui/AppIcon.vue'
 import AppModal from '../ui/AppModal.vue'
 import ListPicker from '../ListPicker.vue'
 import ItemForm from '../../features/items/ItemForm.vue'
@@ -69,17 +85,6 @@ function registerPurchase() {
 </script>
 
 <style scoped>
-.sheet {
-  display: grid;
-  gap: 10px;
-  padding: 8px 0;
-}
-.meta { margin: 0; font-weight: 700; }
-.sheet-btn {
-  width: 100%;
-  justify-content: center;
-  min-height: 48px;
-  font-size: 1rem;
-  text-decoration: none;
-}
+.sheet { display: grid; gap: var(--sp-3); }
+.sheet-meta { margin: calc(-1 * var(--sp-2)) 0 0; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
 </style>

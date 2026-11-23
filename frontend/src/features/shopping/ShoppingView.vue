@@ -1,41 +1,40 @@
 <template>
-  <section class="shopping-view">
-    <header class="head">
-      <h2>Para comprar</h2>
-    </header>
-
-    <div class="summary neu">
+  <section class="page">
+    <div class="summary card">
       <div class="stat">
-        <span class="label">Total estimado</span>
-        <strong class="value">{{ pesos(totalMinor) }}</strong>
-        <span v-if="withoutPrice" class="muted small">{{ withoutPrice }} sin precio</span>
+        <span class="stat-label">Total estimado</span>
+        <strong class="stat-value">{{ pesos(totalMinor) }}</strong>
+        <span v-if="withoutPrice" class="stat-sub">{{ withoutPrice }} sin precio</span>
       </div>
       <div class="stat">
-        <span class="label">Disponible este mes</span>
-        <strong class="value" :class="{ over: budget !== null && totalMinor > remaining }">
+        <span class="stat-label">Disponible este mes</span>
+        <strong class="stat-value" :class="{ over: budget !== null && totalMinor > remaining }">
           {{ budget === null ? '—' : pesos(remaining) }}
         </strong>
-        <RouterLink v-if="budget === null" class="small" to="/presupuesto">Cargar presupuesto</RouterLink>
-        <span v-else class="muted small">de {{ pesos(budget) }} · gastado {{ pesos(spent) }}</span>
+        <RouterLink v-if="budget === null" class="stat-sub" to="/presupuesto">Cargar presupuesto</RouterLink>
+        <span v-else class="stat-sub">de {{ pesos(budget) }} · gastado {{ pesos(spent) }}</span>
       </div>
     </div>
 
-    <div v-for="group in groups" :key="group.key" class="group">
-      <h3>
+    <div v-for="group in groups" :key="group.key" class="section">
+      <h2 class="sec-h">
         <RouterLink :to="group.listId ? `/l/${group.listId}` : '/bandeja'">{{ group.label }}</RouterLink>
-        <span class="muted subtotal">{{ group.subtotal ? pesos(group.subtotal) : '' }}</span>
-      </h3>
-      <ItemCard
-        v-for="item in group.items"
-        :key="item.id"
-        :item="item"
-        :photo="photos[item.id]"
-        @open="active = $event"
-        @toggle="setItemBought($event, true)"
-      />
+        <span class="count">{{ group.items.length }}</span>
+        <span v-if="group.subtotal" class="aside">{{ pesos(group.subtotal) }}</span>
+      </h2>
+      <div class="group">
+        <ItemCard
+          v-for="item in group.items"
+          :key="item.id"
+          :item="item"
+          :photo="photos[item.id]"
+          @open="active = $event"
+          @toggle="setItemBought($event, true)"
+        />
+      </div>
     </div>
 
-    <p v-if="loaded && !groups.length" class="empty-state muted">
+    <p v-if="loaded && !groups.length" class="empty-state">
       No tenés nada pendiente de compra. Agregalo desde una lista o guardá un link en la Bandeja.
     </p>
 
@@ -94,62 +93,26 @@ const groups = computed(() => {
 </script>
 
 <style scoped>
-.shopping-view {
-  display: grid;
-  gap: 18px;
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
 .summary {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 14px;
 }
 .stat {
   display: grid;
   gap: 2px;
   align-content: start;
+  padding: var(--sp-3) var(--sp-4);
 }
-.label {
-  font-size: 0.75rem;
-  font-weight: 800;
+.stat + .stat { border-left: 1px solid var(--border); }
+.stat-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
   color: var(--muted);
 }
-.value {
-  font-size: 1.35rem;
-  font-variant-numeric: tabular-nums;
-}
-.value.over { color: var(--danger); }
-.small { font-size: 0.8rem; }
-.group {
-  display: grid;
-  gap: 8px;
-}
-.group h3 {
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 0.95rem;
-}
-.group h3 a {
-  color: var(--text);
-  text-decoration: none;
-}
-.subtotal {
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-}
-.empty-state {
-  text-align: center;
-  padding: 32px 16px;
-}
+.stat-value { font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat-value.over { color: var(--danger); }
+.stat-sub { font-size: var(--fs-xs); color: var(--muted); }
+a.stat-sub { color: var(--accent); font-weight: 600; }
 </style>

@@ -134,101 +134,70 @@ async function discard() {
 </script>
 
 <style scoped>
+/* Variante ícono (barra superior): usa .icon-btn; acá solo el color por estado. */
 .sync-btn {
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 0;
+  background: transparent;
   color: var(--text);
-  box-shadow: var(--shadow);
-  cursor: pointer;
   font: inherit;
+  cursor: pointer;
+  transition: background var(--ease);
 }
-.sync-btn:disabled {
-  cursor: progress;
-}
-.paused-actions {
-  display: grid;
-  gap: 8px;
-}
-.paused-actions .sync-btn {
-  font-size: 0.82rem;
-  white-space: nowrap;
-}
-.sync-btn.discard {
-  color: var(--danger);
-}
-.discard-error {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--danger);
-}
-.sync-btn.discard:disabled {
-  color: var(--muted);
-  cursor: not-allowed;
-  opacity: 0.7;
-}
+.sync-btn:disabled { cursor: progress; opacity: 1; }
 .sync-btn.icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
+  width: var(--h-icon);
+  height: var(--h-icon);
+  border-radius: var(--r-pill);
   display: grid;
   place-items: center;
 }
+@media (hover: hover) { .sync-btn:hover { background: var(--inset); } }
+/* Variante fila (barra lateral) */
 .sync-btn.row {
   width: 100%;
-  height: 44px;
-  border-radius: 12px;
+  height: var(--h-icon);
+  border-radius: var(--r-sm);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  gap: 12px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--text);
+  gap: var(--sp-3);
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  text-align: left;
 }
+.sync-btn.row .label { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.paused-actions { display: grid; gap: 2px; }
+.sync-btn.discard { color: var(--danger); }
+.sync-btn.discard .label { color: var(--danger); }
+.sync-btn.discard:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+.sync-btn.discard:disabled .label { color: var(--muted); }
+.discard-error { margin: 0; padding: 0 var(--sp-2); font-size: var(--fs-xs); color: var(--danger); }
 .icon-wrap {
   position: relative;
   width: 20px;
   height: 20px;
   display: grid;
   place-items: center;
-  flex-shrink: 0;
+  flex: none;
 }
-.icon-wrap svg {
-  width: 20px;
-  height: 20px;
-}
-.is-ok {
-  color: var(--ok);
-}
-.is-pending {
-  color: var(--accent);
-}
-.is-syncing {
-  color: var(--accent);
-}
-.is-error {
-  color: var(--danger);
-}
-.is-offline {
-  color: var(--muted);
-}
+.icon-wrap svg { width: 20px; height: 20px; }
+.row .icon-wrap, .row .icon-wrap svg { width: 18px; height: 18px; }
+.is-ok { color: var(--ok); }
+.is-pending, .is-syncing { color: var(--accent); }
+.is-error { color: var(--danger); }
+.is-offline { color: var(--muted); }
 .dot {
   position: absolute;
   top: -2px;
-  right: -2px;
+  right: -3px;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--danger);
-  box-shadow: 0 0 0 2px var(--surface);
+  box-shadow: 0 0 0 2px var(--bg);
 }
-.is-pending .dot {
-  background: var(--accent);
-}
-.spin {
-  animation: spin 0.9s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+.is-pending .dot { background: var(--accent); }
+.row .dot { box-shadow: 0 0 0 2px var(--surface); }
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>

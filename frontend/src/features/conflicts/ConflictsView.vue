@@ -1,20 +1,18 @@
 <template>
-  <section>
-    <h2>Conflictos de sincronización</h2>
-    <p v-if="!rows.length" class="muted">No hay conflictos pendientes.</p>
-    <AppCard v-for="c in rows" :key="c.id" class="gap">
-      <p><strong>{{ c.entityType }}</strong> {{ c.entityId }}</p>
-      <p class="muted">{{ c.reason }}</p>
-      <div class="chip-row">
-        <button class="btn" type="button" @click="useRemote(c)">Usar versión del servidor</button>
-        <button class="btn btn-primary" type="button" @click="useLocal(c)">Reenviar mi cambio</button>
+  <section class="page">
+    <p v-if="!rows.length" class="empty-state">No hay conflictos pendientes.</p>
+    <div v-for="c in rows" :key="c.id" class="card card-pad conflict">
+      <p class="row-title"><strong>{{ c.entityType }}</strong> <span class="muted id">{{ c.entityId }}</span></p>
+      <p class="hint">{{ c.reason }}</p>
+      <div class="form-actions">
+        <button class="btn btn-sm" type="button" @click="useRemote(c)">Usar la del servidor</button>
+        <button class="btn btn-sm btn-primary" type="button" @click="useLocal(c)">Reenviar la mía</button>
       </div>
-    </AppCard>
+    </div>
   </section>
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import AppCard from '../../components/ui/AppCard.vue'
 import { dataTick, notifyDataChanged } from '../../app/bus'
 import { useSyncStore } from '../../stores/sync'
 import { db } from '../../db/norte.db'
@@ -53,5 +51,7 @@ async function useLocal(c: ConflictRow) {
 }
 </script>
 <style scoped>
-.gap { margin-bottom: 10px; }
+.conflict { display: grid; gap: var(--sp-2); }
+.conflict p { margin: 0; }
+.id { font-size: var(--fs-xs); overflow-wrap: anywhere; }
 </style>

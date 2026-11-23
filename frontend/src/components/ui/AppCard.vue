@@ -1,8 +1,5 @@
 <template>
-  <div class="neu card">
+  <div class="card card-pad">
     <slot />
   </div>
 </template>
-<style scoped>
-.card { padding: 14px; }
-</style>

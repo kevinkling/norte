@@ -1,30 +1,27 @@
 <template>
-  <AppCard class="task-card" :class="{ done: task.status === 'completada' }" @click="$emit('open', task)">
+  <div class="list-row is-link task-row" :class="{ done: task.status === 'completada' }" @click="$emit('open', task)">
     <button
-      class="check no-drag"
+      class="row-check is-square no-drag"
       type="button"
       :aria-pressed="task.status === 'completada'"
       :aria-label="task.status === 'completada' ? `Reabrir ${task.title}` : `Completar ${task.title}`"
       @click.stop="$emit('toggle', task)"
     >
-      <svg v-if="task.status === 'completada'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 13l4 4L19 7"/></svg>
+      <AppIcon v-if="task.status === 'completada'" name="check" :size="14" :stroke="3" />
     </button>
-    <div class="info">
-      <strong class="name">{{ task.title }}</strong>
-      <p v-if="task.dueOn || task.recurrenceRule || listName" class="meta">
+    <div class="row-main">
+      <span class="row-title">{{ task.title }}</span>
+      <span v-if="task.dueOn || task.recurrenceRule || listName" class="row-meta">
         <span v-if="task.dueOn" :class="{ overdue: task.status === 'pendiente' && task.dueOn < today }">Vence {{ formatDate(task.dueOn) }}</span>
-        <span v-if="task.recurrenceRule" class="muted">Se repite</span>
-        <span v-if="listName" class="muted">{{ listName }}</span>
-      </p>
+        <span v-if="task.recurrenceRule">Se repite</span>
+        <span v-if="listName">{{ listName }}</span>
+      </span>
     </div>
-    <button class="more no-drag" type="button" aria-label="Acciones" @click.stop="$emit('open', task)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-    </button>
-  </AppCard>
+  </div>
 </template>
 
 <script setup lang="ts">
-import AppCard from '../ui/AppCard.vue'
+import AppIcon from '../ui/AppIcon.vue'
 import type { Task } from '../../db/types'
 
 defineProps<{ task: Task; listName?: string }>()
@@ -40,63 +37,6 @@ function formatDate(ymd: string) {
 </script>
 
 <style scoped>
-.task-card {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 10px 12px;
-  cursor: pointer;
-}
-.check {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-  background: var(--inset);
-  color: var(--surface);
-  display: grid;
-  place-items: center;
-}
-.check svg { width: 20px; height: 20px; }
-.check[aria-pressed='true'] {
-  background: var(--ok);
-  border-color: var(--ok);
-}
-.info {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-}
-.name {
-  font-size: 1rem;
-  font-weight: 650;
-  overflow-wrap: anywhere;
-}
-.done .name {
-  text-decoration: line-through;
-  color: var(--muted);
-}
-.meta {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-.overdue { color: var(--danger); font-weight: 700; }
-.more {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-}
-.more svg { width: 20px; height: 20px; }
-.more:active { background: var(--inset); }
+.done .row-title { color: var(--muted); text-decoration: line-through; }
+.overdue { color: var(--danger); font-weight: 600; }
 </style>

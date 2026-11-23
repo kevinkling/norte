@@ -48,42 +48,42 @@ function pick(e: string) {
 <style scoped>
 .emoji-root { display: contents; }
 .emoji-btn {
-  min-height: 44px;
-  min-width: 0;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--inset);
+  border-radius: var(--r-md);
+  background: var(--surface);
   color: var(--text);
-  font-size: 1.4rem;
-  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
 }
 .emoji-btn[aria-expanded='true'] { border-color: var(--accent); }
 .emoji-panel {
   grid-column: 1 / -1;
   order: 99;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  gap: 2px;
   max-height: 180px;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--sp-2);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--inset);
+  border-radius: var(--r-md);
+  background: var(--bg);
 }
 .emoji-opt {
-  min-height: 40px;
+  height: var(--h-icon);
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   background: transparent;
-  font-size: 1.3rem;
-  cursor: pointer;
+  font-size: 1.25rem;
 }
 .emoji-opt:hover,
-.emoji-opt[aria-selected='true'] { background: var(--border); }
+.emoji-opt[aria-selected='true'] { background: var(--inset); }
 .emoji-opt.clear {
   grid-column: 1 / -1;
-  font-size: 0.85rem;
-  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--muted);
 }
 </style>

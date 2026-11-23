@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div v-if="confirmState.open" class="confirm-backdrop" @click.self="answerConfirm(false)">
-      <div class="neu confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-msg">
+      <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirm-msg">
         <p id="confirm-msg" class="confirm-msg">{{ confirmState.message }}</p>
         <div class="confirm-actions">
           <button ref="cancelBtn" class="btn" type="button" @click="answerConfirm(false)">Cancelar</button>
@@ -39,22 +39,19 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
   z-index: 300; /* por encima de los formularios (AppModal usa 200) */
   display: grid;
   place-items: center;
-  padding: 16px;
-  background: rgba(15, 23, 42, 0.5);
+  padding: var(--sp-4);
+  background: var(--scrim);
 }
 .confirm-dialog {
-  width: min(420px, 100%);
-  padding: 18px;
+  width: min(400px, 100%);
+  padding: var(--sp-4);
   display: grid;
-  gap: 16px;
+  gap: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-float);
 }
-.confirm-msg {
-  margin: 0;
-  line-height: 1.4;
-}
-.confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
+.confirm-msg { margin: 0; line-height: 1.45; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: var(--sp-2); }
 </style>

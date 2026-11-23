@@ -1,68 +1,58 @@
 <template>
-  <section class="organize-view">
-    <header class="head">
-      <h2>Categorías y etiquetas</h2>
-    </header>
-
-    <!-- Categorías -->
-    <div class="section-block">
-      <h3>Categorías</h3>
-      <form class="form-card neu" @submit.prevent="saveCategory">
-        <label class="field">
-          <span>{{ editingCategory ? 'Renombrar categoría' : 'Nueva categoría' }}</span>
-          <input v-model="catName" required placeholder="Ej. Iluminación" />
-        </label>
-        <div class="form-actions">
-          <button class="btn btn-primary" type="submit">
-            {{ editingCategory ? 'Guardar' : 'Agregar' }}
-          </button>
-          <button v-if="editingCategory" class="btn" type="button" @click="cancelCat">Cancelar</button>
-        </div>
+  <section class="page organize">
+    <div class="section">
+      <h2 class="sec-h">Categorías <span class="count">{{ visibleCats.length }}</span></h2>
+      <form class="composer" @submit.prevent="saveCategory">
+        <input v-model="catName" required :placeholder="editingCategory ? 'Nuevo nombre' : 'Nueva categoría (ej. Iluminación)'" :aria-label="editingCategory ? 'Renombrar categoría' : 'Nueva categoría'" />
+        <button v-if="editingCategory" class="icon-btn is-muted" type="button" aria-label="Cancelar" @click="cancelCat">
+          <AppIcon name="x" :size="18" />
+        </button>
+        <button class="icon-btn is-fill" type="submit" :disabled="!catName.trim()" :aria-label="editingCategory ? 'Guardar' : 'Agregar categoría'">
+          <AppIcon :name="editingCategory ? 'check' : 'plus'" :size="18" :stroke="2.2" />
+        </button>
       </form>
-
-      <div class="rows-list">
-        <AppCard v-for="c in visibleCats" :key="c.id" class="row-card">
-          <div class="row-info">
-            <strong class="row-name">{{ c.name }}</strong>
-            <span v-if="c.parentId" class="muted sub-label">Subcategoría</span>
-          </div>
-          <div class="row-actions">
-            <button class="btn btn-sm" type="button" @click="startEditCat(c)">Renombrar</button>
-            <button class="btn btn-sm btn-danger" type="button" @click="handleRemoveCategory(c)">Archivar</button>
-          </div>
-        </AppCard>
-        <p v-if="!visibleCats.length" class="empty-state muted">No hay categorías creadas.</p>
+      <div v-if="visibleCats.length" class="group">
+        <div v-for="x in visibleCats" :key="x.id" class="list-row" :class="{ editing: editingCategory?.id === x.id }">
+          <span class="row-main">
+            <span class="row-title">{{ x.name }}</span>
+            <span v-if="x.parentId" class="row-meta">Subcategoría</span>
+          </span>
+          <button class="icon-btn is-muted" type="button" :aria-label="`Renombrar ${x.name}`" title="Renombrar" @click="startEditCat(x)">
+            <AppIcon name="pencil" :size="18" />
+          </button>
+          <button class="icon-btn is-muted" type="button" :aria-label="`Archivar ${x.name}`" title="Archivar" @click="handleRemoveCategory(x)">
+            <AppIcon name="archive" :size="18" />
+          </button>
+        </div>
       </div>
+      <p v-else class="hint">No hay categorías creadas.</p>
     </div>
 
-    <!-- Etiquetas -->
-    <div class="section-block">
-      <h3>Etiquetas</h3>
-      <form class="form-card neu" @submit.prevent="saveTag">
-        <label class="field">
-          <span>{{ editingTag ? 'Renombrar etiqueta' : 'Nueva etiqueta' }}</span>
-          <input v-model="tagName" required placeholder="Ej. Urgente" />
-        </label>
-        <div class="form-actions">
-          <button class="btn btn-primary" type="submit">
-            {{ editingTag ? 'Guardar' : 'Agregar' }}
-          </button>
-          <button v-if="editingTag" class="btn" type="button" @click="cancelTag">Cancelar</button>
-        </div>
+    <div class="section">
+      <h2 class="sec-h">Etiquetas <span class="count">{{ visibleTags.length }}</span></h2>
+      <form class="composer" @submit.prevent="saveTag">
+        <input v-model="tagName" required :placeholder="editingTag ? 'Nuevo nombre' : 'Nueva etiqueta (ej. Urgente)'" :aria-label="editingTag ? 'Renombrar etiqueta' : 'Nueva etiqueta'" />
+        <button v-if="editingTag" class="icon-btn is-muted" type="button" aria-label="Cancelar" @click="cancelTag">
+          <AppIcon name="x" :size="18" />
+        </button>
+        <button class="icon-btn is-fill" type="submit" :disabled="!tagName.trim()" :aria-label="editingTag ? 'Guardar' : 'Agregar etiqueta'">
+          <AppIcon :name="editingTag ? 'check' : 'plus'" :size="18" :stroke="2.2" />
+        </button>
       </form>
-
-      <div class="rows-list">
-        <AppCard v-for="t in visibleTags" :key="t.id" class="row-card">
-          <div class="row-info">
-            <strong class="row-name">{{ t.name }}</strong>
-          </div>
-          <div class="row-actions">
-            <button class="btn btn-sm" type="button" @click="startEditTag(t)">Renombrar</button>
-            <button class="btn btn-sm btn-danger" type="button" @click="handleRemoveTag(t)">Archivar</button>
-          </div>
-        </AppCard>
-        <p v-if="!visibleTags.length" class="empty-state muted">No hay etiquetas creadas.</p>
+      <div v-if="visibleTags.length" class="group">
+        <div v-for="x in visibleTags" :key="x.id" class="list-row" :class="{ editing: editingTag?.id === x.id }">
+          <span class="row-main">
+            <span class="row-title">{{ x.name }}</span>
+          </span>
+          <button class="icon-btn is-muted" type="button" :aria-label="`Renombrar ${x.name}`" title="Renombrar" @click="startEditTag(x)">
+            <AppIcon name="pencil" :size="18" />
+          </button>
+          <button class="icon-btn is-muted" type="button" :aria-label="`Archivar ${x.name}`" title="Archivar" @click="handleRemoveTag(x)">
+            <AppIcon name="archive" :size="18" />
+          </button>
+        </div>
       </div>
+      <p v-else class="hint">No hay etiquetas creadas.</p>
     </div>
   </section>
 </template>
@@ -70,7 +60,7 @@
 <script setup lang="ts">
 import { askConfirm } from '../../app/confirm'
 import { computed, ref, watch } from 'vue'
-import AppCard from '../../components/ui/AppCard.vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
 import { newId, nowIso } from '../../db/ids'
@@ -178,86 +168,8 @@ async function removeTag(id: string) {
 </script>
 
 <style scoped>
-.organize-view {
-  display: grid;
-  gap: 24px;
-}
-@media (min-width: 768px) {
-  .organize-view {
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-    gap: 32px;
-  }
-  .head {
-    grid-column: 1 / -1;
-  }
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.section-block {
-  display: grid;
-  gap: 12px;
-}
-.section-block h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.form-card {
-  padding: 16px;
-  background: var(--surface);
-  display: grid;
-  gap: 12px;
-}
-.form-card .field {
-  margin-bottom: 0;
-}
-.form-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.rows-list {
-  display: grid;
-  gap: 8px;
-}
-.row-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-}
-.row-info {
-  display: grid;
-  gap: 2px;
-}
-.row-name {
-  font-size: 1rem;
-  font-weight: 600;
-}
-.sub-label {
-  font-size: 0.75rem;
-}
-.row-actions {
-  display: flex;
-  gap: 6px;
-}
-.btn-sm {
-  min-height: 32px;
-  padding: 0 10px;
-  font-size: 0.8rem;
-  border-radius: 8px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 16px;
-  font-size: 0.9rem;
+.list-row.editing { background: var(--accent-soft); }
+@media (min-width: 900px) {
+  .organize { grid-template-columns: 1fr 1fr; align-items: start; }
 }
 </style>

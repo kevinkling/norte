@@ -1,36 +1,27 @@
 <template>
-  <section class="purchases-view">
-    <header class="head">
-      <h2>Historial de compras</h2>
-    </header>
-
-    <div class="purchases-list">
-      <AppCard v-for="row in rows" :key="row.id" class="purchase-card">
-        <div class="purchase-info">
-          <strong class="item-name">{{ itemName(row.itemId) }}</strong>
-          <p class="purchase-meta">
-            <span class="date">{{ formatDate(row.purchasedOn) }}</span>
-            <span class="bullet">·</span>
-            <span class="price">{{ pesos(row.paidAmountMinor, row.currency) }}</span>
-          </p>
-          <p v-if="row.notes" class="notes muted">{{ row.notes }}</p>
-        </div>
-        <button class="icon-btn delete-btn" type="button" aria-label="Archivar" @click="handleRemove(row)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+  <section class="page">
+    <div v-if="rows.length" class="group">
+      <div v-for="row in rows" :key="row.id" class="list-row">
+        <span class="row-main">
+          <span class="row-title">{{ itemName(row.itemId) }}</span>
+          <span class="row-meta">
+            <span>{{ formatDate(row.purchasedOn) }}</span>
+            <span v-if="row.notes">{{ row.notes }}</span>
+          </span>
+        </span>
+        <span class="row-end">{{ pesos(row.paidAmountMinor, row.currency) }}</span>
+        <button class="icon-btn is-muted" type="button" :aria-label="`Archivar compra de ${itemName(row.itemId)}`" title="Archivar" @click="handleRemove(row)">
+          <AppIcon name="archive" :size="18" />
         </button>
-      </AppCard>
+      </div>
     </div>
 
-    <p v-if="!rows.length" class="empty-state muted">
-      No hay compras registradas.
-    </p>
+    <p v-else class="empty-state">No hay compras registradas.</p>
 
-    <!-- FAB Nueva compra -->
     <button class="fab" type="button" aria-label="Nueva compra" @click="openNew">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      <AppIcon name="plus" :size="24" :stroke="2.2" />
     </button>
 
-    <!-- Modal de Registro de Compra -->
     <AppModal :open="open" title="Registrar compra" @close="open = false">
       <form class="form" @submit.prevent="save">
         <label class="field"><span>Ítem</span>
@@ -43,12 +34,9 @@
           <label class="field"><span>Fecha</span><input v-model="form.purchasedOn" type="date" required /></label>
           <label class="field"><span>Precio pagado</span><input v-model="form.paid" inputmode="decimal" required placeholder="0" /></label>
         </div>
-        <label class="field"><span>Notas</span><textarea v-model="form.notes" placeholder="Detalles de la compra..."></textarea></label>
-        <label class="field file-field">
-          <span>Fotos</span>
-          <input type="file" accept="image/*" multiple @change="onFiles" />
-        </label>
-        <button class="btn btn-primary submit-btn" type="submit">Guardar</button>
+        <label class="field"><span>Notas</span><textarea v-model="form.notes" placeholder="Detalles de la compra…"></textarea></label>
+        <label class="field"><span>Fotos</span><input type="file" accept="image/*" multiple @change="onFiles" /></label>
+        <div class="form-actions"><button class="btn btn-primary" type="submit">Guardar</button></div>
       </form>
     </AppModal>
   </section>
@@ -58,7 +46,7 @@
 import { askConfirm } from '../../app/confirm'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import AppCard from '../../components/ui/AppCard.vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import AppModal from '../../components/ui/AppModal.vue'
 import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
@@ -132,98 +120,3 @@ async function remove(id: string) {
   await mutateDomain({ entityType: 'purchase', entityId: id, operation: 'delete', table: 'purchases', record: { id } })
 }
 </script>
-
-<style scoped>
-.purchases-view {
-  display: grid;
-  gap: 16px;
-}
-.head h2 {
-  font-family: var(--display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.purchases-list {
-  display: grid;
-  gap: 10px;
-}
-.purchase-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-}
-.purchase-info {
-  display: grid;
-  gap: 4px;
-}
-.item-name {
-  font-size: 1.05rem;
-  font-weight: 650;
-}
-.purchase-meta {
-  margin: 0;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.date {
-  color: var(--muted);
-}
-.bullet {
-  color: var(--border);
-}
-.price {
-  font-weight: 700;
-  color: var(--text);
-}
-.notes {
-  margin: 4px 0 0;
-  font-size: 0.85rem;
-}
-
-.icon-btn {
-  width: 44px;
-  height: 44px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-}
-.icon-btn:active {
-  background: var(--inset);
-  color: var(--text);
-}
-.delete-btn:active {
-  color: var(--danger);
-  background: color-mix(in srgb, var(--danger) 10%, transparent);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  font-size: 0.95rem;
-}
-
-/* Formulario */
-.form {
-  display: grid;
-  gap: 12px;
-  margin-top: 12px;
-}
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.submit-btn {
-  margin-top: 8px;
-  min-height: 48px;
-  font-size: 1.05rem;
-}
-</style>

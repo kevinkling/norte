@@ -1,10 +1,12 @@
 <template>
   <Teleport to="body">
     <div v-if="open" class="backdrop" @click.self="close">
-      <div class="neu dialog" role="dialog" aria-modal="true" :aria-labelledby="titleId">
-        <header>
+      <div class="dialog" role="dialog" aria-modal="true" :aria-labelledby="titleId">
+        <header class="dialog-head">
           <h2 :id="titleId">{{ title }}</h2>
-          <button class="btn" type="button" aria-label="Cerrar" @click="close">Cerrar</button>
+          <button class="icon-btn is-muted" type="button" aria-label="Cerrar" @click="close">
+            <AppIcon name="x" />
+          </button>
         </header>
         <slot />
       </div>
@@ -13,6 +15,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
+import AppIcon from './AppIcon.vue'
 
 const props = defineProps<{ open: boolean; title: string }>()
 const emit = defineEmits<{ close: [] }>()
@@ -25,34 +28,47 @@ onMounted(() => window.addEventListener('keydown', onKey))
 onUnmounted(() => window.removeEventListener('keydown', onKey))
 </script>
 <style scoped>
+/* En el celular la hoja sale desde abajo pero sin tapar la barra inferior. */
 .backdrop {
-  --shell-gap: 12px;
-  --shell-bar: 64px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  z-index: 200;
   display: grid;
   place-items: end center;
-  z-index: 200;
-  padding: 12px;
-  padding-bottom: calc(var(--shell-gap) + var(--safe-bottom) + var(--shell-bar) + var(--shell-gap));
+  padding: var(--sp-3);
+  padding-bottom: calc(var(--nav-h) + var(--sp-3) + env(safe-area-inset-bottom, 0px));
+  background: var(--scrim);
 }
 .dialog {
-  width: min(640px, 100%);
-  max-height: calc(100dvh - 24px - var(--shell-gap) - var(--safe-bottom) - var(--shell-bar) - var(--shell-gap));
+  width: min(560px, 100%);
+  max-height: calc(100dvh - var(--nav-h) - var(--sp-6) - env(safe-area-inset-bottom, 0px));
   overflow: auto;
-  padding: 16px;
+  padding: var(--sp-2) var(--sp-4) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-float);
 }
-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-h2 { margin: 0 0 8px; font-size: 1.2rem; }
+.dialog-head {
+  position: sticky;
+  top: calc(-1 * var(--sp-2));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 calc(-1 * var(--sp-2)) var(--sp-3) 0;
+  padding-top: var(--sp-1);
+  background: var(--surface);
+}
+h2 {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
 @media (min-width: 900px) {
-  .backdrop {
-    place-items: center;
-    padding: 24px;
-  }
-  .dialog {
-    max-height: min(92vh, calc(100dvh - 48px));
-  }
+  .backdrop { place-items: center; padding: var(--sp-5); }
+  .dialog { max-height: min(88vh, calc(100dvh - 48px)); }
 }
 </style>

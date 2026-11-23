@@ -1,28 +1,42 @@
 <template>
-  <section class="capture-view">
-    <div class="card neu">
-      <p v-if="state === 'saving'" class="status">Guardando…</p>
+  <section class="page">
+    <p v-if="state === 'saving'" class="empty-state">Guardando…</p>
 
-      <template v-else-if="state === 'nourl'">
-        <h2>No llegó ningún link</h2>
-        <p class="muted">Abrí esta pantalla desde el Atajo “Guardar en Norte” o pegá el link en la Bandeja.</p>
-        <RouterLink class="btn btn-primary wide" to="/bandeja">Ir a la Bandeja</RouterLink>
-      </template>
+    <template v-else-if="state === 'nourl'">
+      <div class="section">
+        <h2 class="heading">No llegó ningún link</h2>
+        <p class="hint">Abrí esta pantalla desde el Atajo “Guardar en Norte” o pegá el link en la Bandeja.</p>
+      </div>
+      <RouterLink class="btn btn-primary" to="/bandeja">Ir a la Bandeja</RouterLink>
+    </template>
 
-      <template v-else-if="item">
-        <h2>{{ duplicate ? 'Ya lo tenías guardado' : 'Guardado ✓' }}</h2>
-        <p class="muted where">En {{ listName(item.listId) }}</p>
+    <template v-else-if="item">
+      <div class="section">
+        <h2 class="heading">{{ duplicate ? 'Ya lo tenías guardado' : 'Guardado' }}</h2>
+        <p class="hint">En {{ listName(item.listId) }}</p>
+      </div>
+      <div class="group">
         <ItemCard :item="item" :photo="photos[item.id]" @open="editOpen = true" @toggle="() => {}" />
-        <p class="sync-note" :data-ok="synced">
-          {{ synced ? 'Sincronizado: ya lo ves en todos tus dispositivos.' : syncHint }}
-        </p>
-        <div class="actions">
-          <button class="btn btn-primary wide" type="button" @click="pickerOpen = true">Mover a una lista</button>
-          <button class="btn wide" type="button" @click="editOpen = true">Agregar precio o nombre</button>
-          <RouterLink class="btn wide" to="/bandeja">Ir a la Bandeja</RouterLink>
-        </div>
-      </template>
-    </div>
+      </div>
+      <p class="hint sync-note" :data-ok="synced">
+        {{ synced ? 'Sincronizado: ya lo ves en todos tus dispositivos.' : syncHint }}
+      </p>
+      <div class="group">
+        <button class="list-row" type="button" @click="pickerOpen = true">
+          <span class="row-icon"><AppIcon name="move" :size="18" /></span>
+          <span class="row-main row-title">Mover a una lista</span>
+        </button>
+        <button class="list-row" type="button" @click="editOpen = true">
+          <span class="row-icon"><AppIcon name="pencil" :size="18" /></span>
+          <span class="row-main row-title">Agregar precio o nombre</span>
+        </button>
+        <RouterLink class="list-row" to="/bandeja">
+          <span class="row-icon"><AppIcon name="inbox" :size="18" /></span>
+          <span class="row-main row-title">Ir a la Bandeja</span>
+          <AppIcon class="row-chevron" name="chevron-right" :size="16" />
+        </RouterLink>
+      </div>
+    </template>
 
     <ListPicker :open="pickerOpen" title="Mover a…" :current="item?.listId ?? null" include-inbox @close="pickerOpen = false" @pick="moveTo" />
     <ItemForm :open="editOpen" :item="item" :list-id="item?.listId ?? null" @close="editOpen = false" />
@@ -32,6 +46,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import ItemCard from '../../components/items/ItemCard.vue'
 import ListPicker from '../../components/ListPicker.vue'
 import ItemForm from '../items/ItemForm.vue'
@@ -113,37 +128,6 @@ async function moveTo(listId: string | null) {
 </script>
 
 <style scoped>
-.capture-view {
-  display: grid;
-  gap: 16px;
-}
-.card {
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-}
-h2 {
-  font-family: var(--display);
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin: 0;
-}
-.where { margin: -6px 0 0; }
-.status { margin: 0; font-weight: 700; }
-.sync-note {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--muted);
-}
+.heading { font-size: var(--fs-lg); font-weight: 600; }
 .sync-note[data-ok='true'] { color: var(--ok); font-weight: 600; }
-.actions {
-  display: grid;
-  gap: 8px;
-}
-.wide {
-  width: 100%;
-  min-height: 48px;
-  justify-content: center;
-  text-decoration: none;
-}
 </style>

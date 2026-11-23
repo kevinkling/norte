@@ -1,26 +1,29 @@
 <template>
-  <form class="quick-add neu" @submit.prevent="submit">
-    <div class="kind" role="group" aria-label="Tipo">
+  <form class="quick-add" @submit.prevent="submit">
+    <div class="segmented" role="group" aria-label="Tipo">
       <button type="button" :aria-pressed="kind === 'buy'" @click="kind = 'buy'">🛒 Comprar</button>
       <button type="button" :aria-pressed="kind === 'do'" @click="kind = 'do'">✅ Hacer</button>
     </div>
-    <div class="row">
+    <div class="composer">
       <input
         ref="input"
         v-model="text"
-        :placeholder="kind === 'buy' ? 'Ej. Memoria RAM, o pegá un link…' : 'Ej. Limpiar la PC'"
+        :placeholder="kind === 'buy' ? 'Agregar algo o pegar un link…' : 'Ej. Limpiar la PC'"
         :aria-label="kind === 'buy' ? 'Agregar algo para comprar' : 'Agregar algo para hacer'"
         enterkeyhint="done"
         autocomplete="off"
       />
-      <button class="btn btn-primary" type="submit" :disabled="!text.trim()" aria-label="Agregar">Agregar</button>
+      <button class="icon-btn is-fill" type="submit" :disabled="!text.trim()" aria-label="Agregar">
+        <AppIcon name="plus" :size="18" :stroke="2.2" />
+      </button>
     </div>
-    <p v-if="linkHint" class="hint muted">Se guarda como link de {{ linkHint }}</p>
+    <p v-if="linkHint" class="hint">Se guarda como link de {{ linkHint }}</p>
   </form>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import AppIcon from '../../components/ui/AppIcon.vue'
 import { describeLink, extractUrl } from '../../utils/links'
 import { createItem, createTask } from './actions'
 
@@ -61,55 +64,6 @@ async function submit() {
 </script>
 
 <style scoped>
-.quick-add {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-.kind {
-  display: flex;
-  gap: 6px;
-}
-.kind button {
-  flex: 1;
-  min-height: 38px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--inset);
-  color: var(--muted);
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-.kind button[aria-pressed='true'] {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--surface);
-}
-.row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-.row input {
-  min-height: 46px;
-  min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text);
-  padding: 0 14px;
-  font: inherit;
-  font-size: 1rem;
-}
-.row input:focus {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
-}
-.row .btn {
-  min-height: 46px;
-}
-.hint {
-  margin: 0;
-  font-size: 0.82rem;
-}
+.quick-add { display: grid; gap: var(--sp-3); justify-items: start; }
+.quick-add .composer { width: 100%; }
 </style>
