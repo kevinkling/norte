@@ -3,7 +3,7 @@
     <div v-if="task" class="sheet">
       <button class="btn sheet-btn" type="button" @click="mode = 'edit'">Editar</button>
       <button class="btn sheet-btn" type="button" @click="mode = 'move'">Mover a otra lista</button>
-      <button class="btn btn-danger sheet-btn" type="button" @click="archive">Archivar</button>
+      <button class="btn btn-danger sheet-btn" type="button" @click="archive">Eliminar</button>
     </div>
   </AppModal>
 
@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import { askConfirm } from '../../app/confirm'
 import { ref, watch } from 'vue'
 import AppModal from '../ui/AppModal.vue'
 import ListPicker from '../ListPicker.vue'
@@ -45,7 +46,7 @@ async function move(listId: string | null) {
 
 async function archive() {
   if (!props.task) return
-  if (!confirm(`¿Archivar "${props.task.title}"?`)) return
+  if (!await askConfirm(`¿Eliminar "${props.task.title}"?`, { confirmLabel: 'Eliminar' })) return
   await remove('task', 'tasks', props.task.id)
   done()
 }

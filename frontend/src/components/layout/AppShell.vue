@@ -115,6 +115,7 @@
   </nav>
 
   <ListPicker :open="pickerOpen" :current="route.path.startsWith('/l/') ? ui.currentListId : undefined" @close="pickerOpen = false" @pick="goToList" />
+  <ConfirmDialog />
 </template>
 
 <script setup lang="ts">
@@ -122,6 +123,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SyncButton from './SyncButton.vue'
 import ListPicker from '../ListPicker.vue'
+import ConfirmDialog from '../ui/ConfirmDialog.vue'
 import { useSyncStore } from '../../stores/sync'
 import { useUiStore } from '../../stores/ui'
 import { listLabel } from '../../features/lists/actions'

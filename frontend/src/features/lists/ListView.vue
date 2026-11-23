@@ -14,7 +14,7 @@
 
       <div class="section">
         <h3>Para comprar <span class="count">{{ toBuy.length }}</span></h3>
-        <SortableList :items="toBuy" :index="selItem" @update:items="(n) => reorderRows('item', 'items', toBuy, n)" @select="selItem = $event" @move="nudgeItem">
+        <SortableList :items="toBuy" @update:items="(n) => reorderRows('item', 'items', toBuy, n)">
           <template #item="{ element }">
             <ItemCard :item="element" :photo="photos[element.id]" @open="activeItem = $event" @toggle="setItemBought($event, true)" />
           </template>
@@ -24,7 +24,7 @@
 
       <div class="section">
         <h3>Para hacer <span class="count">{{ toDo.length }}</span></h3>
-        <SortableList :items="toDo" :index="selTask" @update:items="(n) => reorderRows('task', 'tasks', toDo, n)" @select="selTask = $event" @move="nudgeTask">
+        <SortableList :items="toDo" @update:items="(n) => reorderRows('task', 'tasks', toDo, n)">
           <template #item="{ element }">
             <TaskCard :task="element" @open="activeTask = $event" @toggle="toggleTask" />
           </template>
@@ -61,6 +61,7 @@
 </template>
 
 <script setup lang="ts">
+import { askConfirm } from '../../app/confirm'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppModal from '../../components/ui/AppModal.vue'
@@ -73,7 +74,7 @@ import TaskSheet from '../../components/tasks/TaskSheet.vue'
 import QuickAdd from './QuickAdd.vue'
 import type { Item, Task } from '../../db/types'
 import { useUiStore } from '../../stores/ui'
-import { archiveList, listLabel, nudged, reorderRows, saveList, setItemBought, toggleTask } from './actions'
+import { archiveList, listLabel, reorderRows, saveList, setItemBought, toggleTask } from './actions'
 import { useNorteData } from './useData'
 
 const props = defineProps<{ listId: string }>()
@@ -89,8 +90,6 @@ const done = computed<(Item | Task)[]>(() => [
   ...tasks.value.filter((t) => t.listId === props.listId && t.status === 'completada'),
 ].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)))
 
-const selItem = ref(-1)
-const selTask = ref(-1)
 const activeItem = ref<Item | null>(null)
 const activeTask = ref<Task | null>(null)
 
@@ -100,8 +99,6 @@ const editEmoji = ref('')
 
 watch(() => props.listId, (id) => {
   ui.setList(id)
-  selItem.value = -1
-  selTask.value = -1
 }, { immediate: true })
 
 watch(editOpen, (open) => {
@@ -111,22 +108,6 @@ watch(editOpen, (open) => {
   }
 })
 
-async function nudgeItem(delta: number) {
-  const next = nudged(toBuy.value, selItem.value, delta)
-  if (!next) return
-  const before = toBuy.value
-  selItem.value += delta
-  await reorderRows('item', 'items', before, next)
-}
-
-async function nudgeTask(delta: number) {
-  const next = nudged(toDo.value, selTask.value, delta)
-  if (!next) return
-  const before = toDo.value
-  selTask.value += delta
-  await reorderRows('task', 'tasks', before, next)
-}
-
 async function saveListEdit() {
   await saveList({ id: props.listId, name: editName.value, emoji: editEmoji.value })
   editOpen.value = false
@@ -134,7 +115,7 @@ async function saveListEdit() {
 
 async function archiveCurrent() {
   if (!list.value) return
-  if (!confirm(`¿Archivar la lista "${list.value.name}"?`)) return
+  if (!await askConfirm(`¿Archivar la lista "${list.value.name}"?`, { confirmLabel: 'Archivar' })) return
   await archiveList(props.listId)
   editOpen.value = false
   const next = lists.value.find((l) => l.id !== props.listId)

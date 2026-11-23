@@ -69,7 +69,7 @@ function param(name: string): string {
 /** Sube el ítem ya mismo: el Atajo abre Safari, que no comparte datos locales con la PWA instalada. */
 async function flush() {
   for (let i = 0; i < 3; i++) {
-    await runSync()
+    await runSync(true)
     if ((await db.outbox.count()) === 0 && sync.status === 'online') return true
     if (sync.status === 'offline') return false
     await new Promise((r) => setTimeout(r, 600))

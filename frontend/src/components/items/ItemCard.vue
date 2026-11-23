@@ -13,12 +13,14 @@
     <img v-if="photo" :src="photo" :alt="''" class="thumb" />
     <div class="info">
       <strong class="name">{{ item.name }}</strong>
-      <p v-if="item.estimatedCostMinor || listName || item.targetMonth" class="meta">
-        <span v-if="item.estimatedCostMinor" class="price">{{ pesos(item.estimatedCostMinor, item.currency) }}</span>
-        <span v-if="listName" class="muted">{{ listName }}</span>
+      <p v-if="listName" class="meta">
+        <span class="muted">{{ listName }}</span>
       </p>
       <SourceLink v-if="item.referenceUrl" :url="item.referenceUrl" />
     </div>
+    <span class="price" :class="{ empty: !item.estimatedCostMinor }" :aria-label="item.estimatedCostMinor ? undefined : 'Sin precio'">
+      {{ item.estimatedCostMinor ? pesos(item.estimatedCostMinor, item.currency) : '—' }}
+    </span>
     <button class="more no-drag" type="button" aria-label="Acciones" @click.stop="$emit('open', item)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
     </button>
@@ -91,7 +93,21 @@ defineEmits<{ open: [Item]; toggle: [Item] }>()
   gap: 8px;
   font-size: 0.82rem;
 }
-.price { font-weight: 700; }
+/* Columna de precio: ancho mínimo fijo y alineada a la derecha para que las filas queden en grilla. */
+.price {
+  flex: none;
+  min-width: 5.5rem;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.price.empty {
+  font-weight: 400;
+  color: var(--muted);
+}
+.done .price { color: var(--muted); }
 .more {
   flex: none;
   width: 40px;

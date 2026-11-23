@@ -57,25 +57,59 @@
       </div>
       <p v-if="sync.pending > 0" class="pending-text">{{ sync.pending }} cambios pendientes de subir</p>
       <p v-if="sync.lastSyncAt" class="sync-time">Última sincronización: {{ formatTime(sync.lastSyncAt) }}</p>
-      <button class="btn" type="button" :disabled="sync.status === 'syncing'" @click="onSync">
-        {{ sync.status === 'syncing' ? 'Sincronizando…' : 'Sincronizar ahora' }}
-      </button>
+      <p v-if="sync.paused" class="pending-text">Pausada: los cambios quedan solo en este dispositivo hasta que reanudes.</p>
+      <div class="sync-actions">
+        <button class="btn" type="button" :disabled="sync.status === 'syncing'" @click="onSync">
+          {{ sync.status === 'syncing' ? 'Sincronizando…' : 'Sincronizar ahora' }}
+        </button>
+        <button class="btn" type="button" @click="setSyncPaused(!sync.paused)">
+          {{ sync.paused ? 'Reanudar sincronización' : 'Pausar sincronización' }}
+        </button>
+        <button
+          v-if="sync.pending > 0 || sync.conflicts > 0"
+          class="btn btn-danger"
+          type="button"
+          :disabled="sync.status === 'syncing' || discarding"
+          @click="onDiscard"
+        >
+          {{ discarding ? 'Descartando…' : 'Descartar cambios locales' }}
+        </button>
+      </div>
+      <p v-if="discardError" class="pending-text">{{ discardError }}</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { askConfirm } from '../../app/confirm'
+import { computed, ref } from 'vue'
 import { useSyncStore } from '../../stores/sync'
-import { runSync } from '../../sync/runner'
+import { discardLocalChanges, runSync, setSyncPaused } from '../../sync/runner'
 
 const sync = useSyncStore()
+const discarding = ref(false)
+const discardError = ref('')
 
 function onSync() {
-  void runSync()
+  void runSync(true)
+}
+
+async function onDiscard() {
+  const n = sync.pending + sync.conflicts
+  if (!await askConfirm(`¿Descartar ${n} cambio(s) local(es) sin subir? Se vuelve a la versión del servidor y esto no se puede deshacer.`, { confirmLabel: 'Descartar' })) return
+  discarding.value = true
+  discardError.value = ''
+  try {
+    await discardLocalChanges()
+  } catch (err) {
+    discardError.value = err instanceof Error ? err.message : 'No se pudieron descartar los cambios.'
+  } finally {
+    discarding.value = false
+  }
 }
 
 const statusLabel = computed(() => {
+  if (sync.paused) return 'Pausada (trabajando en local)'
   if (sync.status === 'syncing') return 'Sincronizando...'
   if (sync.status === 'offline') return 'Sin conexión (trabajando en local)'
   if (sync.status === 'error') return `Error: ${sync.lastError}`
@@ -195,6 +229,7 @@ function formatTime(iso: string) {
   background: var(--ok);
 }
 .dot[data-status='offline'] { background: var(--muted); }
+.sync-actions { display: grid; gap: 8px; margin-top: 8px; }
 .dot[data-status='syncing'] { background: var(--accent); }
 .dot[data-status='error'] { background: var(--danger); }
 

@@ -77,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { askConfirm } from '../../app/confirm'
 import { computed, reactive, ref, watch } from 'vue'
 import AppCard from '../../components/ui/AppCard.vue'
 import AppModal from '../../components/ui/AppModal.vue'
@@ -145,7 +146,7 @@ function handleEdit() {
 
 async function handleRemove() {
   if (!activeInspiration.value) return
-  if (confirm(`¿Seguro que querés archivar este enlace?`)) {
+  if (await askConfirm(`¿Seguro que querés archivar este enlace?`, { confirmLabel: 'Archivar' })) {
     actionsOpen.value = false
     await remove(activeInspiration.value.id)
   }

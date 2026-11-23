@@ -8,7 +8,7 @@
       <button class="btn sheet-btn" type="button" @click="mode = 'edit'">Editar</button>
       <button class="btn sheet-btn" type="button" @click="mode = 'move'">Mover a otra lista</button>
       <button v-if="item.status !== 'comprado'" class="btn sheet-btn" type="button" @click="registerPurchase">Registrar compra con precio</button>
-      <button class="btn btn-danger sheet-btn" type="button" @click="archive">Archivar</button>
+      <button class="btn btn-danger sheet-btn" type="button" @click="archive">Eliminar</button>
     </div>
   </AppModal>
 
@@ -25,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+import { askConfirm } from '../../app/confirm'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppModal from '../ui/AppModal.vue'
@@ -54,7 +55,7 @@ async function move(listId: string | null) {
 
 async function archive() {
   if (!props.item) return
-  if (!confirm(`¿Archivar "${props.item.name}"?`)) return
+  if (!await askConfirm(`¿Eliminar "${props.item.name}"?`, { confirmLabel: 'Eliminar' })) return
   await remove('item', 'items', props.item.id)
   done()
 }

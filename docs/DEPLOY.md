@@ -1,6 +1,6 @@
 # Despliegue y mantenimiento — Norte
 
-Frontend (Cloudflare Pages): `https://<proyecto>.pages.dev`
+Frontend (Cloudflare Pages): `https://norte.kevin-99-kling.workers.dev`
 
 El sync y las fotos salen del browser hacia Supabase. No hay API propio ni Tailscale.
 

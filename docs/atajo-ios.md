@@ -3,7 +3,7 @@
 Safari no deja que una PWA aparezca en la hoja **Compartir** del iPhone. Para guardar links desde Instagram, Pinterest o Mercado Libre se usa un Atajo que abre Norte con el link:
 
 ```
-https://kevinkling.github.io/norte/nuevo?url=<link>
+https://norte.kevin-99-kling.workers.dev/nuevo?url=<link>
 ```
 
 Norte guarda el link en la **Bandeja** y lo sincroniza en el momento.
@@ -20,7 +20,7 @@ Norte guarda el link en la **Bandeja** y lo sincroniza en el momento.
       Instagram a veces comparte texto con el link adentro; esta acción saca el link.
    2. **Obtener elemento de la lista** → **Primer elemento**.
    3. **Codificar URL** (URL Encode) → modo **Codificar**.
-   4. **Texto** → escribí `https://kevinkling.github.io/norte/nuevo?url=` y, al final, insertá la variable **Texto codificado** del paso anterior.
+   4. **Texto** → escribí `https://norte.kevin-99-kling.workers.dev/nuevo?url=` y, al final, insertá la variable **Texto codificado** del paso anterior.
    5. **Abrir URL** (Open URLs) con el resultado del paso 4.
 5. Listo.
 

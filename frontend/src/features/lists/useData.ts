@@ -20,9 +20,14 @@ export function useNorteData() {
     lists.value = await liveLists()
     items.value = (await db.items.toArray()).filter((i) => !i.deletedAt).sort(byPosition)
     tasks.value = (await db.tasks.toArray()).filter((t) => !t.deletedAt).sort(byPosition)
-    const atts = (await db.attachments.toArray()).filter((a) => a.itemId && a.data && !a.deletedAt)
+    // Miniatura del ítem: la portada si hay; si no, la primera foto por posición.
+    const atts = (await db.attachments.toArray())
+      .filter((a) => a.itemId && a.data && !a.deletedAt)
+      .sort((a, b) => Number(b.role === 'cover') - Number(a.role === 'cover') || a.position - b.position)
     const next: Record<string, string> = {}
-    for (const att of atts) next[att.itemId!] = objectUrl(att.data)
+    const covers = new Map<string, Blob>()
+    for (const att of atts) if (!covers.has(att.itemId!)) covers.set(att.itemId!, att.data as Blob)
+    for (const [itemId, blob] of covers) next[itemId] = objectUrl(blob)
     for (const u of urls) URL.revokeObjectURL(u)
     urls = Object.values(next)
     photos.value = next

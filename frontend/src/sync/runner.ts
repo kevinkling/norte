@@ -3,7 +3,10 @@ import { newId } from '../db/ids'
 import { applyRemoteChanges, storeConflicts } from './apply'
 import { flushBlobs } from './blobs'
 import { postSync, supabaseConfigured } from './client'
-import { useSyncStore } from '../stores/sync'
+import { persistPaused, useSyncStore } from '../stores/sync'
+import { notifyDataChanged } from '../app/bus'
+import { entityTable } from './map'
+import type { EntityType } from '../db/types'
 
 let timer: number | null = null
 let running = false
@@ -27,9 +30,54 @@ function apiConfigured(): boolean {
   return supabaseConfigured()
 }
 
-export async function runSync(): Promise<void> {
+export function setSyncPaused(paused: boolean): void {
+  const store = useSyncStore()
+  store.paused = paused
+  persistPaused(paused)
+  if (!paused) scheduleSync(0)
+}
+
+/**
+ * Tira los cambios locales que todavía no se subieron (y los conflictos abiertos)
+ * y vuelve a bajar el estado del servidor. Necesita conexión: si falla a mitad
+ * de camino, el próximo sync completa la bajada.
+ */
+export async function discardLocalChanges(): Promise<{ discarded: number }> {
+  const store = useSyncStore()
+  if (running || store.status === 'syncing') throw new Error('Hay una sincronización en curso. Probá de nuevo en unos segundos.')
+  if (!apiConfigured()) throw new Error('Supabase no configurado: no hay de dónde recuperar la versión del servidor.')
+  if (!navigator.onLine) throw new Error('Sin conexión: hace falta internet para volver a la versión del servidor.')
+
+  const outbox = await db.outbox.toArray()
+  const conflicts = await db.conflicts.filter((c) => !c.resolution).toArray()
+  const affected = new Map<string, { type: EntityType; id: string }>()
+  for (const o of outbox) affected.set(`${o.entityType}:${o.entityId}`, { type: o.entityType, id: o.entityId })
+  for (const c of conflicts) affected.set(`${c.entityType}:${c.entityId}`, { type: c.entityType, id: c.entityId })
+
+  await db.transaction(
+    'rw',
+    [db.lists, db.categories, db.tags, db.itemTags, db.items, db.purchases, db.tasks, db.inspirations, db.monthlyBudgets, db.attachments, db.outbox, db.conflicts, db.syncState],
+    async () => {
+      for (const { type, id } of affected.values()) await db[entityTable[type]].delete(id)
+      await db.outbox.clear()
+      await db.conflicts.clear()
+      await db.syncState.put({ key: 'cursor', value: 0 })
+    },
+  )
+  notifyDataChanged()
+  await runSync(true)
+  notifyDataChanged()
+  return { discarded: affected.size }
+}
+
+export async function runSync(force = false): Promise<void> {
   if (running) return
   const store = useSyncStore()
+  if (store.paused && !force) {
+    store.pending = await db.outbox.count()
+    store.conflicts = await db.conflicts.filter((c) => !c.resolution).count()
+    return
+  }
   if (!apiConfigured()) {
     store.status = 'offline'
     store.lastError = 'Supabase no configurado'
@@ -66,9 +114,14 @@ export async function runSync(): Promise<void> {
         })),
       )
       const applied = new Set(resp.applied ?? [])
+      // Una mutación en conflicto queda guardada en `conflicts` (con la versión local);
+      // si siguiera en el outbox se reenviaría en cada sync y volvería a chocar.
+      const conflicted = new Set((resp.conflicts ?? []).map((c) => c.mutation_id))
       await db.transaction('rw', db.outbox, db.syncState, db.conflicts, async () => {
         for (const row of outbox) {
-          if (applied.has(row.mutationId) && row.localId != null) await db.outbox.delete(row.localId)
+          if ((applied.has(row.mutationId) || conflicted.has(row.mutationId)) && row.localId != null) {
+            await db.outbox.delete(row.localId)
+          }
         }
         await db.syncState.put({ key: 'cursor', value: resp.next_cursor ?? cursor })
       })

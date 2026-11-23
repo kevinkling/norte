@@ -1,5 +1,39 @@
 <template>
+  <!-- En pausa (barra lateral): dos acciones en lugar del botón único. -->
+  <div v-if="variant === 'row' && sync.paused" class="paused-actions">
+    <button
+      class="sync-btn row"
+      type="button"
+      :disabled="sync.status === 'syncing' || discarding"
+      title="Reanuda la sincronización y sube los cambios pendientes"
+      @click="resume"
+    >
+      <span class="icon-wrap" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M10 8.5v7l6-3.5z"/>
+        </svg>
+      </span>
+      <span class="label">{{ sync.status === 'syncing' ? 'Sincronizando…' : 'Reanudar y sincronizar' }}</span>
+    </button>
+    <button
+      class="sync-btn row discard"
+      type="button"
+      :disabled="sync.status === 'syncing' || discarding || sync.pending + sync.conflicts === 0"
+      title="Tira los cambios locales sin subir. La sincronización sigue en pausa."
+      @click="discard"
+    >
+      <span class="icon-wrap" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+        </svg>
+      </span>
+      <span class="label">{{ discarding ? 'Descartando…' : sync.pending + sync.conflicts > 0 ? `Descartar cambios (${sync.pending + sync.conflicts})` : 'Descartar cambios' }}</span>
+    </button>
+    <p v-if="discardError" class="discard-error" role="alert">{{ discardError }}</p>
+  </div>
   <button
+    v-else
     class="sync-btn"
     :class="[variant, tone]"
     type="button"
@@ -13,6 +47,10 @@
       <svg v-if="sync.status === 'syncing'" class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M21 12a9 9 0 1 1-2.6-6.3"/>
         <path d="M21 4v6h-6"/>
+      </svg>
+      <svg v-else-if="sync.paused" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M10 9v6M14 9v6"/>
       </svg>
       <svg v-else-if="sync.status === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M12 9v4M12 17h.01"/>
@@ -37,9 +75,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { askConfirm } from '../../app/confirm'
+import { computed, ref } from 'vue'
 import { useSyncStore } from '../../stores/sync'
-import { runSync } from '../../sync/runner'
+import { discardLocalChanges, runSync, setSyncPaused } from '../../sync/runner'
 
 withDefaults(defineProps<{ variant?: 'icon' | 'row' }>(), { variant: 'icon' })
 
@@ -47,6 +86,7 @@ const sync = useSyncStore()
 
 const tone = computed(() => {
   if (sync.status === 'syncing') return 'is-syncing'
+  if (sync.paused) return 'is-offline'
   if (sync.status === 'error') return 'is-error'
   if (sync.status === 'offline') return 'is-offline'
   if (sync.pending > 0) return 'is-pending'
@@ -55,6 +95,7 @@ const tone = computed(() => {
 
 const label = computed(() => {
   if (sync.status === 'syncing') return 'Sincronizando…'
+  if (sync.paused) return sync.pending > 0 ? `En pausa · ${sync.pending} sin subir` : 'En pausa'
   if (sync.status === 'error') return 'Error de sync'
   if (sync.status === 'offline') return 'Sin conexión'
   if (sync.pending > 0) return `${sync.pending} pendientes`
@@ -67,7 +108,28 @@ const ariaLabel = computed(() => {
 })
 
 function onClick() {
-  void runSync()
+  void runSync(true)
+}
+
+const discarding = ref(false)
+const discardError = ref('')
+
+function resume() {
+  setSyncPaused(false) // quita la pausa y sincroniza enseguida
+}
+
+async function discard() {
+  const n = sync.pending + sync.conflicts
+  if (!await askConfirm(`¿Descartar ${n} cambio(s) local(es) sin subir? Se vuelve a la versión del servidor y esto no se puede deshacer. La sincronización sigue en pausa.`, { confirmLabel: 'Descartar' })) return
+  discarding.value = true
+  discardError.value = ''
+  try {
+    await discardLocalChanges() // no toca la pausa
+  } catch (err) {
+    discardError.value = err instanceof Error ? err.message : 'No se pudieron descartar los cambios.'
+  } finally {
+    discarding.value = false
+  }
 }
 </script>
 
@@ -82,6 +144,27 @@ function onClick() {
 }
 .sync-btn:disabled {
   cursor: progress;
+}
+.paused-actions {
+  display: grid;
+  gap: 8px;
+}
+.paused-actions .sync-btn {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.sync-btn.discard {
+  color: var(--danger);
+}
+.discard-error {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+.sync-btn.discard:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 .sync-btn.icon {
   width: 40px;

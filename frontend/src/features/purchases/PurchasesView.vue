@@ -55,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import { askConfirm } from '../../app/confirm'
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppCard from '../../components/ui/AppCard.vue'
@@ -122,7 +123,7 @@ async function save() {
 }
 
 async function handleRemove(purchase: Purchase) {
-  if (confirm(`¿Seguro que querés archivar la compra de "${itemName(purchase.itemId)}"?`)) {
+  if (await askConfirm(`¿Seguro que querés archivar la compra de "${itemName(purchase.itemId)}"?`, { confirmLabel: 'Archivar' })) {
     await remove(purchase.id)
   }
 }

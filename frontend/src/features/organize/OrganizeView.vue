@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+import { askConfirm } from '../../app/confirm'
 import { computed, ref, watch } from 'vue'
 import AppCard from '../../components/ui/AppCard.vue'
 import { dataTick } from '../../app/bus'
@@ -129,7 +130,7 @@ async function saveCategory() {
 }
 
 async function handleRemoveCategory(c: Category) {
-  if (confirm(`¿Seguro que querés archivar la categoría "${c.name}"?`)) {
+  if (await askConfirm(`¿Seguro que querés archivar la categoría "${c.name}"?`, { confirmLabel: 'Archivar' })) {
     await removeCategory(c.id)
   }
 }
@@ -166,7 +167,7 @@ async function saveTag() {
 }
 
 async function handleRemoveTag(t: Tag) {
-  if (confirm(`¿Seguro que querés archivar la etiqueta "${t.name}"?`)) {
+  if (await askConfirm(`¿Seguro que querés archivar la etiqueta "${t.name}"?`, { confirmLabel: 'Archivar' })) {
     await removeTag(t.id)
   }
 }
