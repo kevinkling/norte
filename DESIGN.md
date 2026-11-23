@@ -118,6 +118,7 @@ Componentes de UI:
 - **`ConfirmDialog` / `askConfirm()`**: para toda acción destructiva. El foco arranca en "Cancelar".
 - **Hojas de acciones** (`ItemSheet`, `TaskSheet`, inspiración): un `.group` de `button.list-row` con `row-icon`. Eliminar/Archivar siempre al final con `.is-danger`.
 - **`ItemCard` / `TaskCard`**: son **filas** (`.list-row`), no tarjetas. Van siempre dentro de un `.group` (o de `<SortableList class="group">`). Tocar la fila abre la hoja de acciones; no agregues botones ⋯ por fila.
+- **`ItemGallery` / `PhotoViewer`**: las fotos de un ítem van en un carrusel arriba de su hoja (`ItemSheet`), con la portada primero; la siguiente foto asoma para indicar que hay más. Tocar una abre `PhotoViewer` a pantalla completa (deslizar, flechas ← → o los botones en pantallas con puntero; Esc cierra solo el visor). El visor es siempre oscuro: usa `--photo-bg`, `--photo-on` y `--photo-btn`, no los colores del tema.
 - **`AppIcon`**: única fuente de íconos (trazo 1.8px, estilo Lucide). Tamaños: 18 en filas y botones chicos, 20 por defecto, 22 en la barra inferior, 24 en el FAB. Para uno nuevo, agregá su SVG a `ICONS`; no pegues `<svg>` sueltos en las pantallas (excepción: la aguja del logo en `AppShell`).
 
 ## 5. Estados e interacción

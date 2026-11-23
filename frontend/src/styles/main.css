@@ -22,6 +22,10 @@
   --warn: #a86a12;
   --focus: #2f6b4f;
   --scrim: rgba(20, 28, 22, 0.45);
+  /* visor de fotos: siempre oscuro, en los dos temas */
+  --photo-bg: #0b0f0c;
+  --photo-on: #f3f4ef;
+  --photo-btn: rgba(243, 244, 239, 0.14);
 
   /* tipografía */
   --font: 'DM Sans Variable', 'DM Sans', system-ui, -apple-system, sans-serif;

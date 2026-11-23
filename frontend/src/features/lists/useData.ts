@@ -1,7 +1,7 @@
 import { onUnmounted, ref, watch } from 'vue'
 import { dataTick } from '../../app/bus'
 import { db } from '../../db/norte.db'
-import { objectUrl } from '../../db/photos'
+import { byGalleryOrder, objectUrl } from '../../db/photos'
 import type { Item, List, Task } from '../../db/types'
 import { listLabel, liveLists } from './actions'
 
@@ -23,7 +23,7 @@ export function useNorteData() {
     // Miniatura del ítem: la portada si hay; si no, la primera foto por posición.
     const atts = (await db.attachments.toArray())
       .filter((a) => a.itemId && a.data && !a.deletedAt)
-      .sort((a, b) => Number(b.role === 'cover') - Number(a.role === 'cover') || a.position - b.position)
+      .sort(byGalleryOrder)
     const next: Record<string, string> = {}
     const covers = new Map<string, Blob>()
     for (const att of atts) if (!covers.has(att.itemId!)) covers.set(att.itemId!, att.data as Blob)

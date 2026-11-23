@@ -44,6 +44,13 @@ export async function savePhoto(opts: {
   return id
 }
 
+/** Orden de las fotos de un ítem: la portada primero; después por posición y fecha de alta. */
+export function byGalleryOrder(a: Attachment, b: Attachment): number {
+  return Number(b.role === 'cover') - Number(a.role === 'cover')
+    || a.position - b.position
+    || a.createdAt.localeCompare(b.createdAt)
+}
+
 export function objectUrl(blob?: Blob | null): string {
   if (!blob) return ''
   return URL.createObjectURL(blob)

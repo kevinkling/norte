@@ -1,6 +1,7 @@
 <template>
   <AppModal :open="Boolean(item) && mode === 'menu'" :title="item?.name || 'Acciones'" @close="$emit('close')">
     <div v-if="item" class="sheet">
+      <ItemGallery :item-id="item.id" />
       <p v-if="item.estimatedCostMinor" class="sheet-meta">{{ pesos(item.estimatedCostMinor, item.currency) }}</p>
       <div class="group">
         <a v-if="item.referenceUrl" class="list-row" :href="item.referenceUrl" target="_blank" rel="noopener noreferrer">
@@ -46,6 +47,7 @@ import { useRouter } from 'vue-router'
 import AppIcon from '../ui/AppIcon.vue'
 import AppModal from '../ui/AppModal.vue'
 import ListPicker from '../ListPicker.vue'
+import ItemGallery from './ItemGallery.vue'
 import ItemForm from '../../features/items/ItemForm.vue'
 import type { Item } from '../../db/types'
 import { describeLink } from '../../utils/links'
@@ -86,5 +88,6 @@ function registerPurchase() {
 
 <style scoped>
 .sheet { display: grid; gap: var(--sp-3); }
-.sheet-meta { margin: calc(-1 * var(--sp-2)) 0 0; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
+.sheet-meta { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
+.sheet-meta:first-child { margin-top: calc(-1 * var(--sp-2)); }
 </style>
