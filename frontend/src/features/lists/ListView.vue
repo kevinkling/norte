@@ -49,7 +49,7 @@
     <AppModal :open="editOpen" title="Editar lista" @close="editOpen = false">
       <form class="list-form" @submit.prevent="saveListEdit">
         <div class="row">
-          <label class="field emoji"><span>Emoji</span><input v-model="editEmoji" maxlength="4" /></label>
+          <EmojiPicker v-model="editEmoji" />
           <label class="field"><span>Nombre</span><input v-model="editName" required /></label>
         </div>
         <button class="btn btn-primary" type="submit">Guardar</button>
@@ -64,6 +64,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppModal from '../../components/ui/AppModal.vue'
+import EmojiPicker from '../../components/ui/EmojiPicker.vue'
 import SortableList from '../../components/SortableList.vue'
 import ItemCard from '../../components/items/ItemCard.vue'
 import ItemSheet from '../../components/items/ItemSheet.vue'

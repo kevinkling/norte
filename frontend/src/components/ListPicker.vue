@@ -17,7 +17,7 @@
         @click="$emit('pick', l.id)"
       >{{ listLabel(l) }}</button>
       <form class="new-list" @submit.prevent="create">
-        <input v-model="emoji" class="emoji-input" maxlength="4" aria-label="Emoji de la lista" placeholder="✨" />
+        <EmojiPicker v-model="emoji" />
         <input v-model="name" aria-label="Nombre de la nueva lista" placeholder="Nueva lista (ej. Setup)" />
         <button class="btn btn-primary" type="submit" :disabled="!name.trim()">Crear</button>
       </form>
@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import AppModal from './ui/AppModal.vue'
+import EmojiPicker from './ui/EmojiPicker.vue'
 import { dataTick } from '../app/bus'
 import type { List } from '../db/types'
 import { listLabel, liveLists, saveList } from '../features/lists/actions'

@@ -1,17 +1,56 @@
+# ── Dependencias ─────────────────────────────
 node_modules/
+.pnpm-store/
+
+# ── Build / caché ────────────────────────────
 dist/
 frontend/dev-dist/
-*.exe
-*.test
-backend/norte-api
-data/*.db-wal
-data/*.db-shm
-data/change_log.jsonl
+*.tsbuildinfo
+.vite/
+.cache/
+coverage/
+.nyc_output/
+
+# ── Variables de entorno y secretos ──────────
+# Los .env reales no se suben; los de ejemplo y el modo offline sí.
 .env
+.env.*
+!.env.example
+!.env.offline
 *.crt
 *.key
-.DS_Store
-.vscode/
-coverage/
+*.pem
+
+# ── Datos locales (legado del API Go; hoy se sincroniza con Supabase) ──
+data/
+
+# ── Supabase CLI (estado local) ──────────────
+supabase/.branches/
+supabase/.temp/
+
+# ── Logs ─────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Binarios / artefactos ────────────────────
+*.exe
+*.test
+
+# ── Python (scripts de las skills) ───────────
 **/__pycache__/
 *.pyc
+
+# ── Editor / sistema operativo ───────────────
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Claude Code (local) ──────────────────────
+.claude/settings.local.json
+.claude/worktrees/

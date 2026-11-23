@@ -2,9 +2,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// En GitHub Pages (proyecto, no dominio custom) la app vive en /<repo>/.
-// GitHub Actions define VITE_BASE_PATH=/norte/ al hacer build para Pages.
-// En desarrollo local queda '/'.
+// Por defecto la app vive en la raíz ('/'), como en Cloudflare Pages.
+// Si se publica bajo un subpath, definir VITE_BASE_PATH (ej. /norte/).
 const base = process.env.VITE_BASE_PATH ?? '/'
 
 export default defineConfig({

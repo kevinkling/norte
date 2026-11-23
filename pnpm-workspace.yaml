@@ -1,6 +1,6 @@
 packages:
   - frontend
 
-onlyBuiltDependencies:
-  - esbuild
-  - vue-demi
+allowBuilds:
+  esbuild: true
+  vue-demi: true

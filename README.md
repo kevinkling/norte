@@ -56,7 +56,7 @@ Safari instala la app (Agregar a inicio) con **HTTPS** o `localhost`. En LAN hac
 Hay iconos PNG (`apple-touch-icon` 180×180, 192 y 512) y metas Apple. La UI usa `system-ui` / `-apple-system`; no carga fuentes de Google.
 
 ## Producción
-Frontend en GitHub Pages (`https://kevinkling.github.io/norte/`). El build necesita los secrets `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. Las fotos van al bucket `attachments` (máximo 10 MB; jpeg, png, webp, gif o heic).
+Frontend en Cloudflare Pages. El build necesita las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` (ver [docs/DEPLOY.md](docs/DEPLOY.md)). Las fotos van al bucket `attachments` (máximo 10 MB; jpeg, png, webp, gif o heic).
 
 ## Backup
 Ver [docs/DEPLOY.md](docs/DEPLOY.md). Contrato de sync: [docs/architecture.md](docs/architecture.md).
