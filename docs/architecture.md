@@ -11,7 +11,7 @@ Los IDs se generan en el cliente (UUID v7). Cada fila sincronizable tiene `revis
 ## Sync
 `rpc sync` aplica mutaciones del outbox (con `base_revision`) y devuelve cambios con `seq` global. Conflicto si `base_revision` no coincide: no hay last-write-wins silencioso.
 
-Las fotos van a Storage (`attachments/<id>`). El JSON de sync no incluye BLOBs. Después de subir, `attachment_content_ready` marca `content_state = ready` si el `sha256` coincide.
+Antes de guardarse, las fotos se achican en el navegador (`utils/image.ts`: lado máximo 1600 px, WebP o JPEG si no hay WebP; GIF y lo que no se puede decodificar quedan como están). Las fotos van a Storage (`attachments/<id>`). El JSON de sync no incluye BLOBs. Después de subir, `attachment_content_ready` marca `content_state = ready` si el `sha256` coincide.
 
 ## Orden
 `position` REAL por `order_scope`. Solo se actualiza el ítem movido, salvo rebalanceo cuando el hueco es menor a 1e-9. Las entidades sincronizables incluyen categorías, etiquetas, `item_tags` e inspiraciones (sueltas o con `item_id`).

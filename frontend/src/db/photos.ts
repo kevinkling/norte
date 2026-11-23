@@ -2,6 +2,7 @@ import { db } from '../db/norte.db'
 import { newId, nowIso } from '../db/ids'
 import { mutateDomain } from '../db/mutate'
 import { sha256Hex } from '../sync/blobs'
+import { compressImage } from '../utils/image'
 import type { Attachment } from '../db/types'
 
 export async function savePhoto(opts: {
@@ -13,7 +14,8 @@ export async function savePhoto(opts: {
   position?: number
 }): Promise<string> {
   const id = newId()
-  const hash = await sha256Hex(opts.file)
+  const file = await compressImage(opts.file)
+  const hash = await sha256Hex(file)
   const now = nowIso()
   const rec: Attachment = {
     id,
@@ -22,11 +24,11 @@ export async function savePhoto(opts: {
     inspirationId: opts.inspirationId ?? null,
     role: opts.role,
     position: opts.position ?? 1024,
-    filename: opts.file.name,
-    mimeType: opts.file.type || 'image/jpeg',
-    byteSize: opts.file.size,
+    filename: file.name,
+    mimeType: file.type || 'image/jpeg',
+    byteSize: file.size,
     sha256: hash,
-    data: opts.file,
+    data: file,
     contentState: 'pending',
     createdAt: now,
     updatedAt: now,
